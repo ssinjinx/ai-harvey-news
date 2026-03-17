@@ -1,8 +1,11 @@
 import logging
+import re
 from email.utils import parsedate_to_datetime
 from urllib.parse import urlparse
 
 import feedparser
+import requests
+from bs4 import BeautifulSoup
 
 from .config import ARTICLES_PER_SECTION, FEEDS
 from .database import Article
@@ -110,3 +113,73 @@ def scrape_category(category: str, limit: int = ARTICLES_PER_SECTION, use_llm: b
 def scrape_all(limit: int = ARTICLES_PER_SECTION, use_llm: bool = False) -> dict[str, list[Article]]:
     """Scrape every configured category. Returns {category: [Article]}."""
     return {category: scrape_category(category, limit, use_llm=use_llm) for category in FEEDS}
+
+
+def fetch_full_article(url: str) -> str | None:
+    """Fetch and extract full article text from a news site."""
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Remove script, style, nav, headers, footers, asides
+        for elem in soup(["script", "style", "nav", "header", "footer", "aside", ".share", ".social", ".comments"]):
+            elem.decompose()
+        
+        # Try common article selectors
+        selectors = [
+            "article",
+            "[itemprop='articleBody']",
+            ".article-body",
+            ".post-content",
+            ".entry-content",
+            ".story-body",
+            "main",
+            ".content",
+            "#content",
+        ]
+        
+        article_elem = None
+        for selector in selectors:
+            article_elem = soup.select_one(selector)
+            if article_elem:
+                break
+        
+        if not article_elem:
+            # Fallback: get all paragraphs
+            article_elem = soup
+        
+        # Extract paragraphs and clean them
+        paragraphs = []
+        for p in article_elem.find_all("p"):
+            text = p.get_text(strip=True)
+            # Skip short paragraphs that are likely UI elements
+            if len(text) < 20:
+                continue
+            # Skip common UI text
+            if text.lower() in ["share", "save", "copy link", "copied", "read more", "continue reading"]:
+                continue
+            # Skip author bios (often contain "@" or "correspondent")
+            if re.search(r'\bcorrespondent\b|\breporter\b|\@\w+\b', text.lower()):
+                continue
+            paragraphs.append(text)
+        
+        if not paragraphs:
+            return None
+        
+        # Join paragraphs with double newline for clean formatting
+        text = "\n\n".join(paragraphs)
+        
+        # Clean up excessive whitespace
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r'[ \t]+', ' ', text)
+        
+        return text if len(text) > 200 else None
+        
+    except Exception as exc:
+        logger.warning("Failed to fetch article from %s: %s", url, exc)
+        return None

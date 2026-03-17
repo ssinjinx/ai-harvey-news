@@ -7,6 +7,7 @@ Usage:
   python main.py scrape             # fetch articles and store in DB
   python main.py scrape --llm       # scrape with LLM summarization via Ollama
   python main.py summarize          # re-summarize existing articles via Ollama
+  python main.py fetch-content      # fetch full article content for existing articles
   python main.py serve              # start the web server
 """
 import logging
@@ -71,6 +72,26 @@ def summarize() -> None:
     logger.info("Done. %d articles re-summarized.", updated)
 
 
+def fetch_content() -> None:
+    """Fetch full article content for articles without content."""
+    from src.database import get_articles_without_content, update_article_content
+    from src.scraper import fetch_full_article
+
+    articles = get_articles_without_content()
+    logger.info("Fetching content for %d articles...", len(articles))
+    updated = 0
+    for article in articles:
+        content = fetch_full_article(article["url"])
+        if content:
+            update_article_content(article["id"], content)
+            updated += 1
+            logger.info("  [%d] %s", article["id"], article["title"][:60])
+        else:
+            logger.warning("  [%d] Failed to fetch: %s", article["id"], article["title"][:60])
+
+    logger.info("Done. %d articles updated with full content.", updated)
+
+
 def serve(debug: bool = False) -> None:
     from src.server import run
     logger.info("Starting web server at http://localhost:5000")
@@ -86,6 +107,8 @@ def main() -> None:
         scrape(use_llm="--llm" in flags)
     elif cmd == "summarize":
         summarize()
+    elif cmd == "fetch-content":
+        fetch_content()
     elif cmd == "serve":
         serve()
     elif cmd in ("all", ""):

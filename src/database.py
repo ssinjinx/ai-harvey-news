@@ -17,6 +17,7 @@ class Article:
     published_at: Optional[str]
     id: Optional[int] = None
     scraped_at: Optional[str] = None
+    content: Optional[str] = None
 
 
 @contextmanager
@@ -39,6 +40,7 @@ def init_db(db_path: str = DB_PATH) -> None:
                 source      TEXT NOT NULL,
                 url         TEXT NOT NULL UNIQUE,
                 summary     TEXT,
+                content     TEXT,
                 category    TEXT NOT NULL,
                 published_at TEXT,
                 scraped_at  TEXT NOT NULL
@@ -95,3 +97,34 @@ def get_all_categories(db_path: str = DB_PATH) -> list[str]:
     with get_conn(db_path) as conn:
         rows = conn.execute("SELECT DISTINCT category FROM articles").fetchall()
     return [r["category"] for r in rows]
+
+
+def get_article_by_id(article_id: int, db_path: str = DB_PATH) -> dict | None:
+    """Fetch a single article by ID with full content."""
+    with get_conn(db_path) as conn:
+        row = conn.execute(
+            "SELECT * FROM articles WHERE id = ?",
+            (article_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def update_article_content(article_id: int, content: str, db_path: str = DB_PATH) -> None:
+    """Update the full content of an article."""
+    with get_conn(db_path) as conn:
+        conn.execute("UPDATE articles SET content = ? WHERE id = ?", (content, article_id))
+
+
+def get_articles_without_content(limit: int = 100, db_path: str = DB_PATH) -> list[dict]:
+    """Get articles that don't have full content yet."""
+    with get_conn(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT id, title, url FROM articles
+            WHERE content IS NULL OR content = ''
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,)
+        ).fetchall()
+    return [dict(r) for r in rows]
