@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News Scraper</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.02em; }
+    header span { font-size: 0.85rem; opacity: 0.6; margin-left: auto; }
+
+    nav {
+      background: #16213e;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding: 0 2rem;
+    }
+    nav a {
+      color: #a0aec0;
+      text-decoration: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    nav a:hover, nav a.active {
+      color: #fff;
+      border-bottom-color: #4299e1;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-header {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      color: #2d3748;
+    }
+
+    .articles {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-left: 4px solid #4299e1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: box-shadow 0.15s;
+    }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+    .card-title a {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1a202c;
+      text-decoration: none;
+    }
+    .card-title a:hover { color: #3182ce; text-decoration: underline; }
+
+    .card-meta {
+      font-size: 0.8rem;
+      color: #718096;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .card-meta .source { font-weight: 600; color: #4a5568; }
+
+    .card-summary {
+      font-size: 0.9rem;
+      color: #4a5568;
+      line-height: 1.55;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: #a0aec0;
+      font-size: 0.95rem;
+    }
+
+    .category-colors {
+      --global: #4299e1;
+      --tech:   #48bb78;
+      --sports: #ed8936;
+      --entertainment: #9f7aea;
+      --ai:     #f56565;
+    }
+    [data-section="global"]       .card { border-left-color: #4299e1; }
+    [data-section="tech"]         .card { border-left-color: #48bb78; }
+    [data-section="sports"]       .card { border-left-color: #ed8936; }
+    [data-section="entertainment"].card { border-left-color: #9f7aea; }
+    [data-section="ai"]           .card { border-left-color: #f56565; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #a0aec0;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>News Scraper</h1>
+    <span>Refreshed automatically on each scrape</span>
+  </header>
+
+  <nav>
+    {% for key, sec in sections.items() %}
+    <a href="#" data-target="{{ key }}" class="{{ 'active' if loop.first else '' }}">
+      {{ sec.label }}
+    </a>
+    {% endfor %}
+  </nav>
+
+  <main>
+    {% for key, sec in sections.items() %}
+    <div class="section {{ 'active' if loop.first else '' }}" id="section-{{ key }}" data-section="{{ key }}">
+      <div class="section-header">{{ sec.label }}</div>
+      {% if sec.articles %}
+      <div class="articles">
+        {% for article in sec.articles %}
+        <div class="card">
+          <div class="card-title"><a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a></div>
+          <div class="card-meta">
+            <span class="source">{{ article.source }}</span>
+            {% if article.published_at %}<span>{{ article.published_at[:10] }}</span>{% endif %}
+          </div>
+          {% if article.summary %}
+          <div class="card-summary">{{ article.summary }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty">No articles yet. Run <code>python main.py scrape</code> to fetch news.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </main>
+
+  <footer>News Scraper &mdash; data stored locally in SQLite</footer>
+
+  <script>
+    const links = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('.section');
+
+    links.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.dataset.target;
+        links.forEach(l => l.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        link.classList.add('active');
+        document.getElementById('section-' + target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
