@@ -98,6 +98,67 @@
       padding: 3rem;
       color: #a0aec0;
     }
+
+    .audio-section {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .listen-btn {
+      background: #4299e1;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .listen-btn:hover {
+      background: #3182ce;
+    }
+
+    .listen-btn:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
+
+    .listen-btn.generating {
+      background: #ed8936;
+    }
+
+    .audio-player {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .audio-status {
+      font-size: 0.85rem;
+      color: #718096;
+    }
+
+    .audio-status.error {
+      color: #e53e3e;
+    }
+
+    .audio-status.success {
+      color: #38a169;
+    }
   </style>
 </head>
 <body>
@@ -112,6 +173,21 @@
       <div class="article-meta">
         <span class="source">{{ article.source }}</span>
         {% if article.published_at %}<span>{{ article.published_at[:10] }}</span>{% endif %}
+      </div>
+
+      <!-- Audio Section -->
+      <div class="audio-section" id="audio-section">
+        <div class="audio-controls">
+          <button class="listen-btn" id="listen-btn" onclick="generateAudio()">
+            <span id="btn-icon">🔊</span>
+            <span id="btn-text">Listen</span>
+          </button>
+          <span class="audio-status" id="audio-status"></span>
+        </div>
+        <audio class="audio-player" id="audio-player" controls style="display: none;">
+          <source id="audio-source" src="" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
       </div>
     </div>
 
@@ -130,5 +206,80 @@
       Source: <a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.source }}</a>
     </div>
   </article>
+
+  <script>
+    const articleId = {{ article.id }};
+    const audioPlayer = document.getElementById('audio-player');
+    const audioSource = document.getElementById('audio-source');
+    const listenBtn = document.getElementById('listen-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const audioStatus = document.getElementById('audio-status');
+
+    // Check if audio is already cached on page load
+    async function checkAudioStatus() {
+      try {
+        const response = await fetch(`/article/${articleId}/audio/status`);
+        const data = await response.json();
+        
+        if (data.available) {
+          // Audio already exists, show player
+          audioSource.src = `/article/${articleId}/audio`;
+          audioPlayer.style.display = 'block';
+          listenBtn.style.display = 'none';
+          audioStatus.textContent = 'Audio ready';
+          audioStatus.className = 'audio-status success';
+          audioPlayer.load();
+        } else if (!data.tts_available) {
+          // TTS not available
+          listenBtn.disabled = true;
+          audioStatus.textContent = 'TTS not available';
+          audioStatus.className = 'audio-status error';
+        }
+      } catch (error) {
+        console.error('Error checking audio status:', error);
+      }
+    }
+
+    async function generateAudio() {
+      listenBtn.disabled = true;
+      listenBtn.classList.add('generating');
+      btnText.textContent = 'Generating...';
+      btnIcon.textContent = '⏳';
+      audioStatus.textContent = 'This may take a moment...';
+      audioStatus.className = 'audio-status';
+
+      try {
+        const response = await fetch(`/article/${articleId}/audio`);
+        
+        if (response.ok) {
+          // Audio generated successfully
+          const blob = await response.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          
+          audioSource.src = audioUrl;
+          audioPlayer.style.display = 'block';
+          listenBtn.style.display = 'none';
+          audioStatus.textContent = 'Audio ready';
+          audioStatus.className = 'audio-status success';
+          audioPlayer.load();
+        } else {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to generate audio');
+        }
+      } catch (error) {
+        console.error('Error generating audio:', error);
+        listenBtn.disabled = false;
+        listenBtn.classList.remove('generating');
+        btnText.textContent = 'Listen';
+        btnIcon.textContent = '🔊';
+        audioStatus.textContent = 'Error: ' + error.message;
+        audioStatus.className = 'audio-status error';
+      }
+    }
+
+    // Check status on page load
+    checkAudioStatus();
+  </script>
 </body>
 </html>

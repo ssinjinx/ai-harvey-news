@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, send_file
 
 from .config import ARTICLES_PER_SECTION, CATEGORY_LABELS, SERVER_HOST, SERVER_PORT
 from .database import get_articles_by_category, get_article_by_id, update_article_content, init_db
 from .scraper import fetch_full_article
+from .tts import generate_speech_for_article, get_audio_for_article, is_available as tts_is_available
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
@@ -60,6 +61,58 @@ def article_view(article_id: int):
         article["content_html"] = ""
     
     return render_template("article.html", article=article)
+
+
+@app.route("/article/<int:article_id>/audio")
+def article_audio(article_id: int):
+    """Generate and serve audio for an article."""
+    # Check if audio already cached
+    cached = get_audio_for_article(article_id)
+    if cached:
+        return send_file(cached, mimetype="audio/wav")
+    
+    # Get article content
+    article = get_article_by_id(article_id)
+    if not article:
+        return jsonify({"error": "Article not found"}), 404
+    
+    # Check if TTS is available
+    if not tts_is_available():
+        return jsonify({"error": "TTS not available"}), 503
+    
+    # Fetch content if not already stored
+    content = article.get("content")
+    if not content:
+        content = fetch_full_article(article["url"])
+        if content:
+            update_article_content(article_id, content)
+    
+    if not content:
+        return jsonify({"error": "No content available for TTS"}), 404
+    
+    # Prepare text for TTS (use title + content)
+    text = f"{article['title']}. {content}"
+    # Limit text length to avoid excessive generation time
+    max_chars = 3000
+    if len(text) > max_chars:
+        text = text[:max_chars] + "..."
+    
+    # Generate audio
+    audio_path = generate_speech_for_article(article_id, text)
+    if audio_path:
+        return send_file(audio_path, mimetype="audio/wav")
+    else:
+        return jsonify({"error": "Failed to generate audio"}), 500
+
+
+@app.route("/article/<int:article_id>/audio/status")
+def article_audio_status(article_id: int):
+    """Check if audio is available for an article."""
+    cached = get_audio_for_article(article_id)
+    return jsonify({
+        "available": cached is not None,
+        "tts_available": tts_is_available(),
+    })
 
 
 def run(host: str = SERVER_HOST, port: int = SERVER_PORT, debug: bool = False) -> None:

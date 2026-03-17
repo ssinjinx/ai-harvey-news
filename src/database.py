@@ -128,3 +128,18 @@ def get_articles_without_content(limit: int = 100, db_path: str = DB_PATH) -> li
             (limit,)
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_articles_with_content(limit: int = 1000, db_path: str = DB_PATH) -> list[dict]:
+    """Get articles that have full content."""
+    with get_conn(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT id, title, content FROM articles
+            WHERE content IS NOT NULL AND content != ''
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,)
+        ).fetchall()
+    return [dict(r) for r in rows]

@@ -8,6 +8,7 @@ Usage:
   python main.py scrape --llm       # scrape with LLM summarization via Ollama
   python main.py summarize          # re-summarize existing articles via Ollama
   python main.py fetch-content      # fetch full article content for existing articles
+  python main.py generate-audio     # generate audio for articles without audio
   python main.py serve              # start the web server
 """
 import logging
@@ -92,6 +93,47 @@ def fetch_content() -> None:
     logger.info("Done. %d articles updated with full content.", updated)
 
 
+def generate_audio() -> None:
+    """Generate audio for articles that don't have it cached."""
+    from src.database import get_articles_with_content, get_article_by_id
+    from src.tts import generate_speech_for_article, is_available, get_audio_for_article
+
+    if not is_available():
+        logger.error("TTS not available. Install with: pip install qwen-tts")
+        sys.exit(1)
+
+    # Get articles with content but no audio
+    articles = get_articles_with_content()
+    to_generate = [a for a in articles if get_audio_for_article(a["id"]) is None]
+
+    logger.info("Generating audio for %d articles...", len(to_generate))
+    generated = 0
+    failed = 0
+
+    for article in to_generate:
+        content = article.get("content", "")
+        if not content:
+            logger.warning("  [%d] No content, skipping: %s", article["id"], article["title"][:60])
+            continue
+
+        # Prepare text (title + content, limited length)
+        text = f"{article['title']}. {content}"
+        max_chars = 3000
+        if len(text) > max_chars:
+            text = text[:max_chars] + "..."
+
+        logger.info("  [%d] Generating audio for: %s", article["id"], article["title"][:60])
+        result = generate_speech_for_article(article["id"], text)
+        if result:
+            generated += 1
+            logger.info("  [%d] Audio generated successfully", article["id"])
+        else:
+            failed += 1
+            logger.error("  [%d] Failed to generate audio", article["id"])
+
+    logger.info("Done. %d audio files generated, %d failed.", generated, failed)
+
+
 def serve(debug: bool = False) -> None:
     from src.server import run
     logger.info("Starting web server at http://localhost:5000")
@@ -109,6 +151,8 @@ def main() -> None:
         summarize()
     elif cmd == "fetch-content":
         fetch_content()
+    elif cmd == "generate-audio":
+        generate_audio()
     elif cmd == "serve":
         serve()
     elif cmd in ("all", ""):

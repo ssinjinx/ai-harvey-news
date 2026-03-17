@@ -2,3 +2,6 @@ feedparser==6.0.11
 flask==3.1.0
 requests
 beautifulsoup4
+qwen-tts
+soundfile
+torch
