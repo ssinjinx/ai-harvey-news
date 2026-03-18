@@ -26,10 +26,13 @@ ENV/
 env/
 .venv/
 
-# Database
+# Database and audio cache
 *.db
 *.sqlite
 *.sqlite3
+data/
+audio_cache/
+*.wav
 
 # IDE
 .vscode/

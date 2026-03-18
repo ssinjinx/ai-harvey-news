@@ -1,36 +1,68 @@
-"""Text-to-Speech module using Qwen3-TTS."""
+"""Text-to-Speech module — Paul Harvey voice clone via Qwen3-TTS."""
+import json
 import logging
-import os
+import re
+import urllib.request
 from pathlib import Path
 from typing import Optional
 
 import soundfile as sf
 import torch
 
-from .config import DB_PATH
+from .config import AUDIO_CACHE_DIR, HARVEY_CLONE_AUDIO, OLLAMA_MODEL, OLLAMA_URL
 
 logger = logging.getLogger("tts")
 
-# Default model - using 0.6B for faster inference and lower memory
-DEFAULT_MODEL = "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice"
-DEFAULT_SPEAKER = "Aiden"  # Sunny American male voice with clear midrange
-DEFAULT_LANGUAGE = "English"
+# Paul Harvey LLM prompt
+HARVEY_SYSTEM_PROMPT = """\
+You are Paul Harvey, the legendary American radio broadcaster known for your
+distinctive storytelling style on "The Rest of the Story" and "News and Comment."
 
-# Cache directory for audio files
-AUDIO_CACHE_DIR = Path(__file__).parent.parent / "audio_cache"
+Rewrite the provided article in your voice and style. Rules:
+
+STRUCTURE:
+- Open with a dramatic hook that pulls the listener in immediately
+- Build suspense by withholding the key reveal until near the end
+- Use "Page 2..." as a transition into the second half
+- End with your signature: "And now you know... the rest of the story."
+- Sign off with: "Good day!"
+
+PACING AND PAUSES:
+- Insert [pause] where you would take a dramatic breath or let a point land
+- Use ellipses (...) for trailing, contemplative thoughts
+- Short sentences for impact. Very short.
+- Then a longer sentence to build and carry the listener along with you.
+
+VOICE:
+- Warm, personal, conversational — as if speaking to one friend, not a crowd
+- Occasional wry humor; never sarcastic
+- Patriotic undertone when relevant, never preachy
+- Names and places spoken with familiarity, as if you know them personally
+- Avoid jargon; prefer plain, vivid language
+
+FORBIDDEN:
+- Do not summarize — dramatize
+- Do not use bullet points or lists
+- Do not break character or mention AI
+- Keep the factual content accurate; only style changes
+- Output ONLY the spoken script, no stage directions or labels
+"""
+
+DEFAULT_MODEL = "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
 
 # Global model instance (lazy loaded)
 _model = None
 
 
 def get_cache_path(article_id: int) -> Path:
-    """Get the cache path for an article's audio file."""
-    AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     return AUDIO_CACHE_DIR / f"article_{article_id}.wav"
 
 
+def get_script_cache_path(article_id: int) -> Path:
+    return AUDIO_CACHE_DIR / f"article_{article_id}_script.txt"
+
+
 def is_available() -> bool:
-    """Check if TTS is available (qwen-tts installed and working)."""
     try:
         from qwen_tts import Qwen3TTSModel
         return True
@@ -39,114 +71,83 @@ def is_available() -> bool:
 
 
 def get_model():
-    """Get or initialize the TTS model (lazy loading)."""
     global _model
     if _model is None:
-        if not is_available():
-            raise RuntimeError("qwen-tts not installed. Run: pip install qwen-tts")
-        
         from qwen_tts import Qwen3TTSModel
-        
-        logger.info(f"Loading Qwen3-TTS model: {DEFAULT_MODEL}")
-        
-        # Determine device
-        if torch.cuda.is_available():
-            device_map = "cuda:0"
-            dtype = torch.bfloat16
-            logger.info("Using CUDA for TTS")
-        else:
-            device_map = "cpu"
-            dtype = torch.float32
-            logger.info("Using CPU for TTS (slower)")
-        
-        try:
-            _model = Qwen3TTSModel.from_pretrained(
-                DEFAULT_MODEL,
-                device_map=device_map,
-                dtype=dtype,
-                attn_implementation="eager",  # Use eager attention for compatibility
-            )
-            logger.info("TTS model loaded successfully")
-        except Exception as e:
-            logger.error(f"Failed to load TTS model: {e}")
-            raise
-    
+        logger.info("Loading %s for Harvey voice clone...", DEFAULT_MODEL)
+        device_map = "cuda:0" if torch.cuda.is_available() else "cpu"
+        _model = Qwen3TTSModel.from_pretrained(DEFAULT_MODEL, device_map=device_map)
+        logger.info("TTS model loaded (device=%s)", device_map)
     return _model
 
 
-def generate_speech(
-    text: str,
-    output_path: str | Path,
-    speaker: str = DEFAULT_SPEAKER,
-    language: str = DEFAULT_LANGUAGE,
-    instruct: Optional[str] = None,
-) -> bool:
-    """
-    Generate speech from text using Qwen3-TTS.
-    
-    Args:
-        text: The text to convert to speech
-        output_path: Where to save the audio file
-        speaker: Speaker name (e.g., 'Aiden', 'Ryan', 'Serena')
-        language: Language code (e.g., 'English', 'Chinese')
-        instruct: Optional instruction for voice style (e.g., "Speak slowly and clearly")
-    
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        model = get_model()
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"Generating speech for text ({len(text)} chars) with speaker={speaker}")
-        
-        # Generate audio
-        wavs, sr = model.generate_custom_voice(
-            text=text,
-            language=language,
-            speaker=speaker,
-            instruct=instruct or "",
-        )
-        
-        # Save audio file
-        sf.write(str(output_path), wavs[0], sr)
-        logger.info(f"Audio saved to {output_path}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to generate speech: {e}")
-        return False
+def rewrite_as_harvey(text: str) -> str:
+    """Rewrite article text in Paul Harvey's style via Ollama."""
+    payload = json.dumps({
+        "model": OLLAMA_MODEL,
+        "stream": False,
+        "messages": [
+            {"role": "system", "content": HARVEY_SYSTEM_PROMPT},
+            {"role": "user", "content": text},
+        ],
+    }).encode()
+    req = urllib.request.Request(
+        OLLAMA_URL,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        data = json.loads(resp.read())
+    return data["message"]["content"]
+
+
+def strip_pause_markers(script: str) -> str:
+    return re.sub(r"\[pause\]", ", ", script)
 
 
 def generate_speech_for_article(article_id: int, text: str, force: bool = False) -> Optional[Path]:
     """
-    Generate speech for an article and cache it.
-    
-    Args:
-        article_id: The article ID
-        text: The text content to convert
-        force: If True, regenerate even if cached file exists
-    
-    Returns:
-        Path to the audio file if successful, None otherwise
+    Full Harvey pipeline for one article:
+      1. LLM rewrite as Paul Harvey
+      2. Voice clone TTS with harveyclip.wav
+      3. Cache the .wav and script to extraspace
     """
     cache_path = get_cache_path(article_id)
-    
-    # Check if already cached
+    script_path = get_script_cache_path(article_id)
+
     if cache_path.exists() and not force:
-        logger.info(f"Using cached audio for article {article_id}")
+        logger.info("Using cached audio for article %d", article_id)
         return cache_path
-    
-    # Generate new audio
-    if generate_speech(text, cache_path):
+
+    try:
+        # Step 1: LLM rewrite
+        logger.info("[%d] Rewriting as Paul Harvey via Ollama (%s)...", article_id, OLLAMA_MODEL)
+        script = rewrite_as_harvey(text)
+        script_path.write_text(script, encoding="utf-8")
+
+        # Step 2: Strip pause markers
+        tts_text = strip_pause_markers(script)
+
+        # Step 3: Voice clone TTS
+        logger.info("[%d] Generating Harvey voice clone (%d chars)...", article_id, len(tts_text))
+        model = get_model()
+        audios, sr = model.generate_voice_clone(
+            text=tts_text,
+            ref_audio=HARVEY_CLONE_AUDIO,
+            x_vector_only_mode=True,
+            language="english",
+        )
+
+        sf.write(str(cache_path), audios[0], sr)
+        logger.info("[%d] Audio saved to %s", article_id, cache_path)
         return cache_path
-    
-    return None
+
+    except Exception as e:
+        logger.error("[%d] Failed to generate audio: %s", article_id, e)
+        return None
 
 
 def get_audio_for_article(article_id: int) -> Optional[Path]:
-    """Get the cached audio file for an article if it exists."""
     cache_path = get_cache_path(article_id)
     if cache_path.exists():
         return cache_path
@@ -154,106 +155,15 @@ def get_audio_for_article(article_id: int) -> Optional[Path]:
 
 
 def delete_audio_cache(article_id: Optional[int] = None) -> int:
-    """
-    Delete cached audio files.
-    
-    Args:
-        article_id: If provided, delete only that article's audio.
-                   If None, delete all cached audio.
-    
-    Returns:
-        Number of files deleted
-    """
     deleted = 0
-    
     if article_id is not None:
-        cache_path = get_cache_path(article_id)
-        if cache_path.exists():
-            cache_path.unlink()
-            deleted += 1
+        for path in [get_cache_path(article_id), get_script_cache_path(article_id)]:
+            if path.exists():
+                path.unlink()
+                deleted += 1
     else:
         if AUDIO_CACHE_DIR.exists():
-            for f in AUDIO_CACHE_DIR.glob("*.wav"):
+            for f in AUDIO_CACHE_DIR.glob("article_*"):
                 f.unlink()
                 deleted += 1
-    
     return deleted
-
-
-# Voice cloning functions (for Phase 2 - Paul Harvey voice)
-def generate_voice_clone(
-    text: str,
-    output_path: str | Path,
-    ref_audio: str | Path,
-    ref_text: str,
-    language: str = DEFAULT_LANGUAGE,
-) -> bool:
-    """
-    Generate speech using voice cloning.
-    
-    Args:
-        text: The text to convert to speech
-        output_path: Where to save the audio file
-        ref_audio: Path to reference audio file for voice cloning
-        ref_text: Transcript of the reference audio
-        language: Language code
-    
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        from qwen_tts import Qwen3TTSModel
-        
-        # Load the base model for voice cloning
-        model = Qwen3TTSModel.from_pretrained(
-            "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
-            device_map="cuda:0" if torch.cuda.is_available() else "cpu",
-            dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-            attn_implementation="eager",
-        )
-        
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"Generating voice clone for text ({len(text)} chars)")
-        
-        wavs, sr = model.generate_voice_clone(
-            text=text,
-            language=language,
-            ref_audio=str(ref_audio),
-            ref_text=ref_text,
-        )
-        
-        sf.write(str(output_path), wavs[0], sr)
-        logger.info(f"Cloned audio saved to {output_path}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Failed to generate voice clone: {e}")
-        return False
-
-
-def create_voice_clone_prompt(ref_audio: str | Path, ref_text: str):
-    """
-    Create a reusable voice clone prompt from reference audio.
-    
-    This is useful for generating multiple clips with the same voice
-    without reprocessing the reference audio each time.
-    """
-    try:
-        from qwen_tts import Qwen3TTSModel
-        
-        model = Qwen3TTSModel.from_pretrained(
-            "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
-            device_map="cuda:0" if torch.cuda.is_available() else "cpu",
-            dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-            attn_implementation="eager",
-        )
-        
-        return model.create_voice_clone_prompt(
-            ref_audio=str(ref_audio),
-            ref_text=ref_text,
-        )
-    except Exception as e:
-        logger.error(f"Failed to create voice clone prompt: {e}")
-        return None

@@ -1,6 +1,24 @@
 import os
+from pathlib import Path
 
-DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
+# External storage root — keeps DB and audio off the local drive
+DATA_DIR = Path(os.environ.get(
+    "HARVEY_DATA_DIR",
+    "/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data",
+))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+DB_PATH = str(DATA_DIR / "news.db")
+AUDIO_CACHE_DIR = DATA_DIR / "audio_cache"
+AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Paul Harvey voice cloning
+HARVEY_CLONE_AUDIO = os.environ.get("HARVEY_CLONE_AUDIO", "/home/ssinjin/Music/harveyclip.wav")
+
+# Ollama settings for Paul Harvey LLM rewrite
+OLLAMA_URL = "http://localhost:11434/api/chat"
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "minimax-m2.5:cloud")
+
 ARTICLES_PER_SECTION = 5
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = int(os.environ.get("PORT", 9090))
@@ -23,8 +41,8 @@ FEEDS = {
         "https://deadline.com/feed/",
     ],
     "ai": [
-        "https://venturebeat.com/ai/feed/",
-        "https://www.artificialintelligence-news.com/feed/",
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     ],
 }
 
