@@ -4,7 +4,7 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template, send_file
 
 from .config import ARTICLES_PER_SECTION, CATEGORY_LABELS, SERVER_HOST, SERVER_PORT
-from .database import get_articles_by_category, get_article_by_id, update_article_content, init_db
+from .database import get_articles_by_category, get_article_by_id, update_article_content, init_db, get_all_categories
 from .scraper import fetch_full_article
 from .tts import generate_speech_for_article, get_audio_for_article, is_available as tts_is_available
 
@@ -15,11 +15,131 @@ app = Flask(__name__, template_folder=str(TEMPLATES_DIR))
 
 @app.route("/")
 def index():
+    return render_template("desktop/index.html", sections={})
+
+
+@app.route("/home/")
+def home():
+    """Desktop home - all categories in a single page."""
     sections = {}
     for category, label in CATEGORY_LABELS.items():
         articles = get_articles_by_category(category, ARTICLES_PER_SECTION)
         sections[category] = {"label": label, "articles": articles}
-    return render_template("index.html", sections=sections)
+    return render_template("desktop/index.html", sections=sections)
+
+
+@app.route("/mobile/")
+def mobile_home():
+    """Mobile home - single column news feed with bottom nav."""
+    sections = {}
+    for category, label in CATEGORY_LABELS.items():
+        articles = get_articles_by_category(category, ARTICLES_PER_SECTION)
+        sections[category] = {"label": label, "articles": articles}
+    return render_template("mobile/index.html", sections=sections)
+
+
+@app.route("/category/<category_key>/")
+def category_page(category_key: str):
+    """Category-specific mobile page."""
+    if category_key not in CATEGORY_LABELS:
+        return "Category not found", 404
+    label = CATEGORY_LABELS[category_key]
+    articles = get_articles_by_category(category_key, ARTICLES_PER_SECTION * 2)
+    return render_template(
+        f"mobile/{category_key}.html",
+        category=category_key,
+        label=label,
+        articles=articles
+    )
+
+
+@app.route("/desktop/category/<category_key>/")
+def desktop_category_page(category_key: str):
+    """Category-specific desktop page."""
+    if category_key not in CATEGORY_LABELS:
+        return "Category not found", 404
+    label = CATEGORY_LABELS[category_key]
+    articles = get_articles_by_category(category_key, ARTICLES_PER_SECTION * 2)
+    return render_template(
+        f"desktop/{category_key}.html",
+        category=category_key,
+        label=label,
+        articles=articles
+    )
+
+
+@app.route("/brain/")
+def brain_page():
+    """The Brain - Harvey AI explanation page."""
+    return render_template("desktop/brain.html")
+
+
+@app.route("/mobile/brain/")
+def mobile_brain_page():
+    """The Brain - Mobile version."""
+    return render_template("mobile/brain.html")
+
+
+@app.route("/home/")
+def home():
+    """Desktop home - all categories in a single page."""
+    sections = {}
+    for category, label in CATEGORY_LABELS.items():
+        articles = get_articles_by_category(category, ARTICLES_PER_SECTION)
+        sections[category] = {"label": label, "articles": articles}
+    return render_template("desktop/index.html", sections=sections)
+
+
+@app.route("/mobile/")
+def mobile_home():
+    """Mobile home - single column news feed with bottom nav."""
+    sections = {}
+    for category, label in CATEGORY_LABELS.items():
+        articles = get_articles_by_category(category, ARTICLES_PER_SECTION)
+        sections[category] = {"label": label, "articles": articles}
+    return render_template("mobile/index.html", sections=sections)
+
+
+@app.route("/category/<category_key>/")
+def category_page(category_key: str):
+    """Category-specific mobile page."""
+    if category_key not in CATEGORY_LABELS:
+        return "Category not found", 404
+    label = CATEGORY_LABELS[category_key]
+    articles = get_articles_by_category(category_key, ARTICLES_PER_SECTION * 2)
+    return render_template(
+        f"mobile/{category_key}.html",
+        category=category_key,
+        label=label,
+        articles=articles
+    )
+
+
+@app.route("/desktop/category/<category_key>/")
+def desktop_category_page(category_key: str):
+    """Category-specific desktop page."""
+    if category_key not in CATEGORY_LABELS:
+        return "Category not found", 404
+    label = CATEGORY_LABELS[category_key]
+    articles = get_articles_by_category(category_key, ARTICLES_PER_SECTION * 2)
+    return render_template(
+        f"desktop/{category_key}.html",
+        category=category_key,
+        label=label,
+        articles=articles
+    )
+
+
+@app.route("/brain/")
+def brain_page():
+    """The Brain - Harvey AI explanation page."""
+    return render_template("desktop/brain.html")
+
+
+@app.route("/mobile/brain/")
+def mobile_brain_page():
+    """The Brain - Mobile version."""
+    return render_template("mobile/brain.html")
 
 
 @app.route("/api/articles/<category>")
