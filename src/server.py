@@ -43,8 +43,9 @@ except ImportError:
         return False
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+STATIC_DIR = Path(__file__).parent.parent / "static"
 
-app = Flask(__name__, template_folder=str(TEMPLATES_DIR))
+app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR), static_url_path="/static")
 
 
 @app.route("/")
