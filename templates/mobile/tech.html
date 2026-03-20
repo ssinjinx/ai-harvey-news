@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}HARVEY AI | World News{% endblock %}
+{% block body %}
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl border-b border-[#414754]/15 shadow-[0_8_32px_rgba(0,0,0,0.4)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#acc7ff] text-2xl animate-pulse" style="font-variation-settings: 'FILL' 1;">memory</span>
+<span class="font-['Space_Grotesk'] text-xl font-bold tracking-tighter text-[#acc7ff] italic">HARVEY AI</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-sm text-[#acc7ff] drop-shadow-[0_0_8px_rgba(172,199,255,0.4)]" href="/mobile/">Stream</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-sm text-[#414754] hover:bg-[#30353b] hover:text-[#acc7ff] transition-all duration-300 px-3 py-1 rounded" href="/brain/">Pulse</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-sm text-[#414754] hover:bg-[#30353b] hover:text-[#acc7ff] transition-all duration-300 px-3 py-1 rounded" href="/category/tech/">Tech</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-sm text-[#414754] hover:bg-[#30353b] hover:text-[#acc7ff] transition-all duration-300 px-3 py-1 rounded" href="/category/sports/">Sports</a>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+<img alt="AI Assistant Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4rScFlRF0HRMjZHny_ySpgpJi6zRqxBxoYY_Jz10pKhMlL3oDPZejgd6y2KzOTGyn_314Cu-0BYhrzT_VAorj-wh8pe4CJng2T766cY5zu_ru2n_uBinbrdGBovsKdZTDjz3J3broYgYBs6R9F7dslm3DhCTEttJZf8UMvslnS18_S1P8_5RoWrFZkE4OLFolRNyhun_hVWNIppjl6LM3wP27ri7kVnheA2Ol9acIZxh8DpEvBEBF3CjvBkhzFP9Zr0RH7ZfHbw"/>
+</div>
+</nav>
+
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto">
+<!-- Category Header -->
+<header class="mb-12 flex items-center gap-4">
+<div class="bg-surface-container-highest p-3 rounded-xl border border-outline-variant/15 neon-glow-primary">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">public</span>
+</div>
+<div>
+<h1 class="font-headline text-4xl font-bold tracking-tight text-on-surface uppercase italic">WORLD NEWS</h1>
+<div class="flex items-center gap-2 mt-1">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-label text-[10px] tracking-[0.2em] text-outline uppercase">Global Intelligence Stream</span>
+</div>
+</div>
+</header>
+
+<!-- Featured Story Bento -->
+{% set featured = articles[0] if articles else none %}
+{% if featured %}
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-16">
+<div class="lg:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container border border-outline-variant/10">
+<div class="aspect-[16/9] relative overflow-hidden">
+<img alt="Global" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHlftnwFcEod1mXO_yZPsnVkfFMDdYtrhRl4f9rr1LSpAe1PigsaVNz6ZeTEgEeixG6Sary1lOqG0n3SO2QZ71mm8Syc-NE46rLrmkjPnh1iGaqOK2SiLPZYYngQB9sa1MlXd5ctPZC46N6rGhlnz3S2U7Ei8tJ2WKJxTEVFluLPUFoFfXPoNUR81_UvO0xEZbX0EqdCAIqNoLiDEycKtXG5cOopSvTmBa5hmSBFV7yDsDGgpA7CheBdaqAyQGNnKMxGyHl6AMYQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-secondary-container text-on-secondary-container font-label text-[10px] px-3 py-1 rounded-full border border-secondary/20 tracking-widest uppercase">Global Shift</span>
+</div>
+</div>
+<div class="asymmetric-pull -mt-20 relative z-10 pb-8 pr-8">
+<h2 class="font-headline text-3xl md:text-5xl font-bold text-on-surface leading-tight mb-4 max-w-2xl drop-shadow-2xl">
+{{ featured.title[:80] + '...' if featured.title|length > 80 else featured.title }}
+</h2>
+{% if featured.summary %}
+<p class="font-body text-on-surface-variant text-lg max-w-xl mb-6">
+{{ featured.summary[:200] + '...' if featured.summary|length > 200 else featured.summary }}
+</p>
+{% endif %}
+<a href="/article/{{ featured.id }}" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed px-6 py-3 rounded-xl font-label font-bold uppercase tracking-wider flex items-center gap-2 transition-all hover:brightness-110 hover:shadow-[0_0_20px_rgba(172,199,255,0.3)] active:scale-95">
+Read Investigation
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Side Bento Element -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="flex-1 glass-panel rounded-xl p-6 border border-outline-variant/15 flex flex-col justify-between">
+<div>
+<span class="font-label text-[10px] text-tertiary tracking-widest uppercase mb-4 block">Harvey's Pulse</span>
+<h3 class="font-headline text-2xl font-bold text-on-surface">Sentiment Index</h3>
+</div>
+<div class="my-6">
+<div class="flex items-end gap-1 h-24">
+<div class="flex-1 bg-surface-container-highest rounded-t-sm h-[40%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-sm h-[60%]"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[85%] shadow-[0_0_10px_rgba(172,199,255,0.4)]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-sm h-[50%]"></div>
+<div class="flex-1 bg-tertiary rounded-t-sm h-[95%] shadow-[0_0_10px_rgba(171,214,0,0.4)]"></div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label text-[10px] text-outline uppercase">Market Readiness</span>
+<span class="font-headline text-xl text-tertiary font-bold tracking-tighter">94.2%</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/5">
+<span class="font-label text-[10px] text-outline tracking-widest uppercase mb-2 block">Trending Vectors</span>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 group cursor-pointer">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-primary transition-colors">LLM Multi-modal Shifts</span>
+</li>
+<li class="flex items-center gap-3 group cursor-pointer">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-primary transition-colors">Quantum Neural Linkage</span>
+</li>
+<li class="flex items-center gap-3 group cursor-pointer">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-primary transition-colors">Edge Computing Paradigms</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+{% endif %}
+
+<!-- Curated List -->
+<section class="space-y-12">
+<h3 class="font-headline text-xl font-bold tracking-widest text-outline uppercase flex items-center gap-4">
+Curated Intelligence
+<span class="h-px flex-1 bg-outline-variant/20"></span>
+</h3>
+
+{% for article in articles[1:] %}
+<!-- News Card -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+<div class="md:col-span-4 rounded-xl overflow-hidden aspect-video md:aspect-square bg-surface-container-low">
+<img alt="News" class="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7IiaAB-6O2Cf_nDZjPE-66d3TV7iBrggufpw8rd_ojJTTM-ktWJQyIGwq2f8GJ8l6fUlPZqSWMxl5Om0zUfdNRwVdOHposGJwqdyO6PFS1Z5nTdpnqidjFkNuGT1ei5Q4LA1rf7BbVE0lk6ua3ChkIAwJJFuhjdWSeiTQb1N48VcUNqJe3ubDCe7dn3Y74hkX079PccSaNiCYPiOyKhDFFxgVE2QliGi4P1XTEbDK837gskndqb22nRzvYDeowPy9jwHuoDI8xw"/>
+</div>
+<div class="md:col-span-8 asymmetric-pull">
+<div class="flex items-center gap-4 mb-3">
+<span class="font-label text-[10px] text-primary tracking-widest uppercase">Global Policy</span>
+<span class="text-outline text-xs">•</span>
+<span class="font-label text-[10px] text-outline tracking-widest uppercase">{{ article.source }}</span>
+</div>
+<h4 class="font-headline text-2xl font-semibold text-on-surface mb-4 hover:text-primary transition-colors cursor-pointer">
+<a href="/article/{{ article.id }}">{{ article.title }}</a>
+</h4>
+{% if article.summary %}
+<!-- Harvey Summary Card -->
+<div class="bg-surface-container-low border-l-2 border-tertiary rounded-r-xl p-5 relative mt-6">
+<div class="absolute -top-3 left-4 bg-tertiary text-on-tertiary px-2 py-0.5 rounded text-[9px] font-label font-bold uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+Harvey's Analysis
+</div>
+<p class="font-body text-sm italic text-on-surface-variant leading-relaxed">
+"{{ article.summary[:200] + '...' if article.summary|length > 200 else article.summary }}"
+</p>
+</div>
+{% endif %}
+</div>
+</div>
+{% else %}
+<div class="text-center py-12 text-outline">
+<p class="font-headline">No world news yet. Run <code>python main.py scrape</code> to fetch news.</p>
+</div>
+{% endfor %}
+</section>
+
+<!-- Load More Button -->
+{% if articles %}
+<div class="mt-16 flex justify-center">
+<button class="font-label text-[10px] tracking-[0.3em] uppercase text-outline border border-outline-variant/30 px-12 py-4 rounded-xl hover:bg-surface-container-highest hover:text-primary transition-all">
+Synchronize More Data
+</button>
+</div>
+{% endif %}
+</main>
+
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-4 pb-safe bg-[#1b2026]/70 backdrop-blur-20px z-50 rounded-t-xl border-t border-[#414754]/15 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] md:hidden">
+<button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors" onclick="window.location.href='/mobile/'">
+<span class="material-symbols-outlined mb-1">sensors</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Stream</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#acc7ff] bg-[#acc7ff]/10 rounded-xl px-4 py-1 border-b-2 border-[#acc7ff]">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Pulse</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors">
+<span class="material-symbols-outlined mb-1">settings_input_component</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Studio</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors">
+<span class="material-symbols-outlined mb-1">bookmarks</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Library</span>
+</button>
+</nav>
+
+<!-- Ambient Background Accents -->
+<div class="fixed top-1/4 -right-24 w-96 h-96 bg-primary/5 blur-[120px] rounded-full -z-10"></div>
+<div class="fixed bottom-1/4 -left-24 w-96 h-96 bg-secondary/5 blur-[120px] rounded-full -z-10"></div>
+{% endblock %}

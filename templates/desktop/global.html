@@ -1,28 +1,109 @@
 {% extends "base.html" %}
-{% block title %}NEON PULSE | Global News{% endblock %}
+{% block title %}NEON PULSE | Global News
+<script>
+let currentAudio = null;
+let currentArticleId = null;
+
+function updatePlayButtons(isPlaying) {
+    const harveyBtn = document.getElementById('harvey-play-btn');
+    if (harveyBtn) {
+        harveyBtn.innerHTML = isPlaying
+            ? '<span class="material-symbols-outlined text-4xl" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>'
+            : '<span class="material-symbols-outlined text-4xl" data-icon="play_arrow">play_arrow</span>';
+    }
+}
+
+function playFeaturedAudio(articleId) {
+    if (currentAudio && currentArticleId === articleId) {
+        if (currentAudio.paused) {
+            currentAudio.play();
+            updatePlayButtons(true);
+        } else {
+            currentAudio.pause();
+            updatePlayButtons(false);
+        }
+        return;
+    }
+
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        updatePlayButtons(false);
+    }
+
+    currentArticleId = articleId;
+    const harveyStatus = document.getElementById('harvey-audio-status');
+
+    fetch('/article/' + articleId + '/audio/status')
+        .then(r => r.json())
+        .then(data => {
+            if (data.available) {
+                currentAudio = new Audio('/article/' + articleId + '/audio');
+                currentAudio.play();
+                updatePlayButtons(true);
+                if (harveyStatus) harveyStatus.textContent = 'Playing...';
+
+                currentAudio.onended = function() {
+                    updatePlayButtons(false);
+                    if (harveyStatus) harveyStatus.textContent = '';
+                    currentAudio = null;
+                    currentArticleId = null;
+                };
+            } else if (data.tts_available) {
+                if (harveyStatus) harveyStatus.textContent = 'Generating...';
+                fetch('/article/' + articleId + '/audio')
+                    .then(r => { if (r.ok) return r.blob(); throw new Error('Failed'); })
+                    .then(blob => {
+                        currentAudio = new Audio(URL.createObjectURL(blob));
+                        currentAudio.play();
+                        updatePlayButtons(true);
+                        if (harveyStatus) harveyStatus.textContent = 'Playing...';
+
+                        currentAudio.onended = function() {
+                            updatePlayButtons(false);
+                            if (harveyStatus) harveyStatus.textContent = '';
+                            currentAudio = null;
+                            currentArticleId = null;
+                        };
+                    })
+                    .catch(err => {
+                        if (harveyStatus) harveyStatus.textContent = 'Error';
+                        updatePlayButtons(false);
+                    });
+            } else {
+                if (harveyStatus) harveyStatus.textContent = 'Not available';
+            }
+        });
+}
+</script>
+{% endblock %}
 {% block body %}
 <!-- Top Navigation Bar -->
-<header class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_8_32px_rgba(0,0,0,0.4)]">
-<div class="text-2xl font-bold tracking-tighter text-blue-400 font-headline uppercase">NEON PULSE</div>
-<nav class="hidden md:flex gap-8 font-['Space_Grotesk'] uppercase tracking-wider text-sm">
-<a class="text-blue-400 border-b-2 border-blue-400 pb-1" href="/desktop/category/global/">World News</a>
-<a class="text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/ai/">AI News</a>
-<a class="text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/tech/">Tech</a>
-<a class="text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/sports/">Sports</a>
-<a class="text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/entertainment/">Entertainment</a>
-</nav>
-<div class="flex items-center gap-6">
+<nav class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl shadow-[0_8_32px_rgba(0,0,0,0.4)] flex justify-between items-center px-8 h-20">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-blue-400 font-['Space_Grotesk']">NEON PULSE</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-blue-400 border-b-2 border-blue-400 pb-1" href="/desktop/category/global/">World News</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/ai/">AI News</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/tech/">Tech</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/sports/">Sports</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="/desktop/category/entertainment/">Entertainment</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
 <div class="relative hidden lg:block">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
-<input class="bg-surface-container-lowest border-none rounded-xl pl-10 pr-4 py-2 text-xs font-label tracking-widest focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="TERMINAL SEARCH..." type="text"/>
+<input class="bg-surface-container-lowest border-none text-xs font-label py-2 px-4 w-64 rounded-xl focus:ring-2 focus:ring-primary transition-all" placeholder="QUERY NETWORK..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
 </div>
-<div class="flex gap-4">
-<span class="material-symbols-outlined text-blue-400 cursor-pointer active:scale-95 duration-200" data-icon="notifications">notifications</span>
-<span class="material-symbols-outlined text-blue-400 cursor-pointer active:scale-95 duration-200" data-icon="account_circle">account_circle</span>
-</div>
+<button class="p-2 hover:bg-white/5 rounded-full transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined text-blue-400" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-white/5 rounded-full transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined text-blue-400" data-icon="account_circle">account_circle</span>
+</button>
 </div>
 <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 h-[1px] w-full absolute bottom-0"></div>
-</header>
+</nav>
 
 <!-- Side Navigation Bar -->
 <aside class="hidden lg:flex flex-col pt-24 h-screen bg-[#171c22] w-64 fixed left-0 top-0 border-r border-white/5 z-40">
@@ -42,10 +123,10 @@
 </div>
 </div>
 <nav class="flex flex-col font-['Space_Grotesk'] font-medium text-xs">
-<a class="bg-blue-500/10 text-blue-400 border-l-4 border-blue-400 flex items-center gap-4 px-6 py-4 active:translate-x-1 transition-transform" href="/home/">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="/home/">
 <span class="material-symbols-outlined" data-icon="sensors">sensors</span> Live Stream
 </a>
-<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="#">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="/brain/">
 <span class="material-symbols-outlined" data-icon="psychology">psychology</span> Deep Dive
 </a>
 <a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="#">
@@ -63,7 +144,7 @@
 </aside>
 
 <!-- Main Content Canvas -->
-<main class="lg:ml-64 pt-28 px-8 pb-12 min-h-screen">
+<main class="lg:ml-64 pt-24 px-6 pb-12">
 
 <!-- Hero Analysis Section -->
 {% set featured = articles[0] if articles else none %}
@@ -90,42 +171,50 @@
 </div>
 </div>
 
-<!-- Harvey Audio Player Widget -->
+<!-- AI Harvey's Take Widget -->
 <div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-8 flex flex-col justify-between border border-white/5">
 <div>
 <div class="flex justify-between items-start mb-8">
 <div>
-<h2 class="font-headline text-xl font-bold text-primary tracking-tight">HARVEY_AUDIO</h2>
-<p class="font-label text-[10px] text-outline tracking-widest uppercase">World Briefing v21.4</p>
+<h2 class="font-headline text-xl font-bold text-primary tracking-tight">AI Harvey's Take</h2>
+<p class="font-label text-[10px] text-outline tracking-widest uppercase">Daily Brief</p>
 </div>
 <span class="material-symbols-outlined text-primary text-3xl animate-pulse" data-icon="graphic_eq">graphic_eq</span>
 </div>
 <div class="mb-8">
 <p class="text-xs font-label text-outline mb-2 uppercase tracking-widest">Now Decrypting:</p>
-<h3 class="text-xl font-headline font-medium text-on-surface leading-tight">Global Events Shaping Tomorrow</h3>
+<h3 class="text-xl font-headline font-medium text-on-surface leading-tight">{% if featured %}{{ featured.title[:60] + '...' if featured.title|length > 60 else featured.title }}{% else %}No article available{% endif %}</h3>
 </div>
 <div class="space-y-4 mb-8">
 <div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
 <div class="h-full bg-primary w-2/3 shadow-[0_0_10px_rgba(172,199,255,0.5)]"></div>
 </div>
 <div class="flex justify-between font-label text-[10px] text-outline">
-<span>04:22</span>
-<span>06:45</span>
+<span>00:00</span>
+<span>--:--</span>
 </div>
 </div>
 </div>
 <div class="flex items-center justify-center gap-8">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<button class="text-on-surface-variant opacity-50 cursor-not-allowed">
 <span class="material-symbols-outlined text-3xl" data-icon="skip_previous">skip_previous</span>
 </button>
-<button class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary-container shadow-lg shadow-primary/20">
-<span class="material-symbols-outlined text-4xl" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>
+{% if featured %}
+<button onclick="playFeaturedAudio({{ featured.id }})" id="harvey-play-btn" class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary-container shadow-lg shadow-primary/20 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-4xl" data-icon="play_arrow">play_arrow</span>
 </button>
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+{% else %}
+<button class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-4xl" data-icon="play_arrow">play_arrow</span>
+</button>
+{% endif %}
+<button class="text-on-surface-variant opacity-50 cursor-not-allowed">
 <span class="material-symbols-outlined text-3xl" data-icon="skip_next">skip_next</span>
 </button>
 </div>
+<p id="harvey-audio-status" class="text-center text-xs text-outline mt-3"></p>
 </div>
+
 </section>
 
 <!-- Bento Grid Feed -->
@@ -187,4 +276,81 @@ Global Stream <span class="h-[1px] flex-grow bg-gradient-to-r from-outline-varia
 </div>
 </section>
 </main>
+
+<script>
+let currentAudio = null;
+let currentArticleId = null;
+
+function updatePlayButtons(isPlaying) {
+    const harveyBtn = document.getElementById('harvey-play-btn');
+    if (harveyBtn) {
+        harveyBtn.innerHTML = isPlaying
+            ? '<span class="material-symbols-outlined text-4xl" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>'
+            : '<span class="material-symbols-outlined text-4xl" data-icon="play_arrow">play_arrow</span>';
+    }
+}
+
+function playFeaturedAudio(articleId) {
+    if (currentAudio && currentArticleId === articleId) {
+        if (currentAudio.paused) {
+            currentAudio.play();
+            updatePlayButtons(true);
+        } else {
+            currentAudio.pause();
+            updatePlayButtons(false);
+        }
+        return;
+    }
+
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        updatePlayButtons(false);
+    }
+
+    currentArticleId = articleId;
+    const harveyStatus = document.getElementById('harvey-audio-status');
+
+    fetch('/article/' + articleId + '/audio/status')
+        .then(r => r.json())
+        .then(data => {
+            if (data.available) {
+                currentAudio = new Audio('/article/' + articleId + '/audio');
+                currentAudio.play();
+                updatePlayButtons(true);
+                if (harveyStatus) harveyStatus.textContent = 'Playing...';
+
+                currentAudio.onended = function() {
+                    updatePlayButtons(false);
+                    if (harveyStatus) harveyStatus.textContent = '';
+                    currentAudio = null;
+                    currentArticleId = null;
+                };
+            } else if (data.tts_available) {
+                if (harveyStatus) harveyStatus.textContent = 'Generating...';
+                fetch('/article/' + articleId + '/audio')
+                    .then(r => { if (r.ok) return r.blob(); throw new Error('Failed'); })
+                    .then(blob => {
+                        currentAudio = new Audio(URL.createObjectURL(blob));
+                        currentAudio.play();
+                        updatePlayButtons(true);
+                        if (harveyStatus) harveyStatus.textContent = 'Playing...';
+
+                        currentAudio.onended = function() {
+                            updatePlayButtons(false);
+                            if (harveyStatus) harveyStatus.textContent = '';
+                            currentAudio = null;
+                            currentArticleId = null;
+                        };
+                    })
+                    .catch(err => {
+                        if (harveyStatus) harveyStatus.textContent = 'Error';
+                        updatePlayButtons(false);
+                    });
+            } else {
+                if (harveyStatus) harveyStatus.textContent = 'Not available';
+            }
+        });
+}
+</script>
 {% endblock %}
