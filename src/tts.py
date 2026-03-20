@@ -54,11 +54,16 @@ DEFAULT_MODEL = "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
 _model = None
 
 
-def get_cache_path(article_id: int) -> Path:
+def get_cache_path(article_id: int, category: str = None) -> Path:
+    if category:
+        # Format: worldnewsarticle_10.wav, ainewsarticle_10.wav, etc.
+        return AUDIO_CACHE_DIR / f"{category}newsarticle_{article_id}.wav"
     return AUDIO_CACHE_DIR / f"article_{article_id}.wav"
 
 
-def get_script_cache_path(article_id: int) -> Path:
+def get_script_cache_path(article_id: int, category: str = None) -> Path:
+    if category:
+        return AUDIO_CACHE_DIR / f"{category}newsarticle_{article_id}_script.txt"
     return AUDIO_CACHE_DIR / f"article_{article_id}_script.txt"
 
 
@@ -105,18 +110,18 @@ def strip_pause_markers(script: str) -> str:
     return re.sub(r"\[pause\]", ", ", script)
 
 
-def generate_speech_for_article(article_id: int, text: str, force: bool = False) -> Optional[Path]:
+def generate_speech_for_article(article_id: int, text: str, force: bool = False, category: str = None) -> Optional[Path]:
     """
     Full Harvey pipeline for one article:
       1. LLM rewrite as Paul Harvey
       2. Voice clone TTS with harveyclip.wav
       3. Cache the .wav and script to extraspace
     """
-    cache_path = get_cache_path(article_id)
-    script_path = get_script_cache_path(article_id)
+    cache_path = get_cache_path(article_id, category)
+    script_path = get_script_cache_path(article_id, category)
 
     if cache_path.exists() and not force:
-        logger.info("Using cached audio for article %d", article_id)
+        logger.info("Using cached audio for article %d (%s)", article_id, category)
         return cache_path
 
     try:
@@ -147,10 +152,24 @@ def generate_speech_for_article(article_id: int, text: str, force: bool = False)
         return None
 
 
-def get_audio_for_article(article_id: int) -> Optional[Path]:
+def get_audio_for_article(article_id: int, category: str = None) -> Optional[Path]:
+    # Try category-specific cache path first
+    cache_path = get_cache_path(article_id, category)
+    if cache_path.exists():
+        return cache_path
+    # Fallback for backwards compatibility (generic article_X.wav)
     cache_path = get_cache_path(article_id)
     if cache_path.exists():
         return cache_path
+    # Fallback: check static/audio/ (pushed via GitHub)
+    static_audio = Path(__file__).parent.parent / "static" / "audio"
+    if category:
+        static_path = static_audio / f"{category}newsarticle_{article_id}.wav"
+        if static_path.exists():
+            return static_path
+    static_path = static_audio / f"article_{article_id}.wav"
+    if static_path.exists():
+        return static_path
     return None
 
 

@@ -32,8 +32,9 @@ env/
 *.sqlite3
 data/
 audio_cache/
-*.wav
-!comfyui/*.wav
+
+# Static audio (pushed via git)
+static/audio/*.wav
 
 # IDE
 .vscode/

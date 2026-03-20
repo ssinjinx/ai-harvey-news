@@ -11,11 +11,34 @@ from .scraper import fetch_full_article
 try:
     from .tts import generate_speech_for_article, get_audio_for_article, is_available as tts_is_available
 except ImportError:
-    # Server without GPU/TTS dependencies
-    def generate_speech_for_article(article_id, text):
+    # Server without GPU/TTS - still serve cached audio files
+    from .config import AUDIO_CACHE_DIR
+    from pathlib import Path
+
+    def generate_speech_for_article(article_id, text, category=None):
         return None
-    def get_audio_for_article(article_id):
+
+    def get_audio_for_article(article_id, category=None):
+        # Check for cached audio files with category prefix first, then fallback
+        if category:
+            cache_path = AUDIO_CACHE_DIR / f"{category}newsarticle_{article_id}.wav"
+            if cache_path.exists():
+                return cache_path
+        # Fallback to old naming
+        cache_path = AUDIO_CACHE_DIR / f"article_{article_id}.wav"
+        if cache_path.exists():
+            return cache_path
+        # Fallback: check static/audio/ (pushed via GitHub)
+        static_audio = Path(__file__).parent.parent / "static" / "audio"
+        if category:
+            static_path = static_audio / f"{category}newsarticle_{article_id}.wav"
+            if static_path.exists():
+                return static_path
+        static_path = static_audio / f"article_{article_id}.wav"
+        if static_path.exists():
+            return static_path
         return None
+
     def tts_is_available():
         return False
 
@@ -135,15 +158,17 @@ def article_view(article_id: int):
 @app.route("/article/<int:article_id>/audio")
 def article_audio(article_id: int):
     """Generate and serve audio for an article."""
-    # Check if audio already cached
-    cached = get_audio_for_article(article_id)
-    if cached:
-        return send_file(cached, mimetype="audio/wav")
-
-    # Get article content
+    # Get article to find its category
     article = get_article_by_id(article_id)
     if not article:
         return jsonify({"error": "Article not found"}), 404
+
+    category = article.get("category")
+
+    # Check if audio already cached
+    cached = get_audio_for_article(article_id, category)
+    if cached:
+        return send_file(cached, mimetype="audio/wav")
 
     # Check if TTS is available
     if not tts_is_available():
@@ -177,7 +202,9 @@ def article_audio(article_id: int):
 @app.route("/article/<int:article_id>/audio/status")
 def article_audio_status(article_id: int):
     """Check if audio is available for an article."""
-    cached = get_audio_for_article(article_id)
+    article = get_article_by_id(article_id)
+    category = article.get("category") if article else None
+    cached = get_audio_for_article(article_id, category)
     return jsonify({
         "available": cached is not None,
         "tts_available": tts_is_available(),
