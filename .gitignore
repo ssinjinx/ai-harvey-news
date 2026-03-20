@@ -33,6 +33,7 @@ env/
 data/
 audio_cache/
 *.wav
+!comfyui/*.wav
 
 # IDE
 .vscode/

@@ -85,6 +85,11 @@ ai-harvey-news/
 ├── templates/
 │   ├── index.html           # News listing by category
 │   └── article.html         # Article reader with audio player
+├── comfyui/
+│   ├── workflow_api.json    # ComfyUI InfiniteTalk workflow (API format)
+│   ├── submit.py            # Script to submit video generation jobs
+│   ├── harveycyborg.png     # Harvey reference face image
+│   └── harveyclip_5s.wav    # Harvey voice reference clip (5s)
 └── requirements.txt
 ```
 
@@ -122,166 +127,71 @@ data/
 
 ---
 
-## Web UI: Neon Pulse Design System
+## InfiniteTalk Video Generation (ComfyUI)
 
-The app includes a modern mobile and desktop UI with a "Neon Pulse" cyberpunk design.
+Harvey is animated as a talking-head video using WAN 2.1 InfiniteTalk. The video appears as a small portrait widget on the website — rendered locally via ComfyUI and synced to his cloned voice audio.
 
-### Design Features
+### Output
 
-- Dark cyberpunk theme (#0f1419 background)
-- Glass morphism panels with backdrop blur
-- Neon blue (#acc7ff) and purple (#6f00be) accents
-- Custom fonts: Space Grotesk + Inter
-- Fully responsive - mobile-first with bottom nav, desktop with side nav
+- **Resolution:** 240×416 (portrait)
+- **Format:** H.264 MP4 with audio
+- **Generation time:** ~2 min per 5 seconds of audio, ~1 hour for 3 minutes
+- **VRAM peak:** ~18.6 GB (requires 24 GB GPU)
 
-### Available Routes
+### Models Required
 
-| Route | Description |
-|-------|-------------|
-| `/` | Desktop home |
-| `/home/` | Desktop home (full news feed) |
-| `/mobile/` | Mobile home (bottom navigation) |
-| `/category/ai/` | Mobile AI category page |
-| `/category/world/` | Mobile World category page |
-| `/desktop/category/ai/` | Desktop AI category |
-| `/desktop/category/world/` | Desktop World category |
-| `/brain/` | Desktop "The Brain" about page |
-| `/mobile/brain/` | Mobile about page |
+Place in your ComfyUI model directories:
 
-### Template Structure
+| Model | Location | Size |
+|-------|----------|------|
+| `wan2.1-i2v-14b-480p-Q3_K_S.gguf` | `models/unet/` | ~6.8 GB |
+| `Wan2_1-InfiniteTalk_Single_Q4_K_M.gguf` | `models/unet/` | ~4.6 GB |
+| `umt5-xxl-enc-fp8_e4m3fn.safetensors` | `models/text_encoders/` | ~5.8 GB |
+| `wan_2.1_vae.safetensors` | `models/vae/` | ~0.4 GB |
+| `clip_vision_h.safetensors` | `models/clip_vision/` | ~0.6 GB |
+| `lightx2v_I2V_14B_480p_cfg_step_distill_rank32_bf16.safetensors` | `models/loras/` | ~0.5 GB |
 
-```
-templates/
-├── base.html              # Shared Neon Pulse design system (Tailwind config, styles)
-├── desktop/
-│   ├── index.html         # Home feed with viral hero, bento grid
-│   ├── ai.html            # AI category with featured story
-│   ├── world.html         # World news
-│   └── brain.html         # About page (neural pipeline explanation)
-└── mobile/
-    ├── index.html         # Home with hero, category sections
-    ├── ai.html            # AI category
-    ├── world.html         # World news
-    └── brain.html         # About page
-```
+### Custom Nodes Required
 
----
+- [ComfyUI-WanVideoWrapper](https://github.com/kijai/ComfyUI-WanVideoWrapper)
+- [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
+- [ComfyUI_KJNodes](https://github.com/kijai/ComfyUI_KJNodes)
 
-## Deployment to IONOS Cloud Server
-
-### Prerequisites
-
-- IONOS Cloud Server (Ubuntu) with SSH access
-- Domain pointed to server IP
-
-### Step 1: Connect to Server
+### Usage
 
 ```bash
-ssh root@YOUR_SERVER_IP
+cd comfyui/
+
+# Submit with defaults (harveycyborg.png + harveyclip_5s.wav, 240x416)
+python submit.py
+
+# Custom inputs
+python submit.py --image myface.png --audio myclip.wav
+
+# Different resolution (keep portrait — height must be > width)
+python submit.py --width 480 --height 832
 ```
 
-### Step 2: Install Dependencies
+### Critical Settings (AMD ROCm / 15 GB RAM)
 
-```bash
-# Update and install Python
-apt update && apt install -y python3 python3-pip python3-venv git nginx
+These were required to prevent OOM crashes on a system with 15 GB RAM and 24 GB VRAM:
 
-# Clone the repository
-cd /opt
-git clone https://github.com/ssinjinx/ai-harvey-news.git
-cd ai-harvey-news
+| Node | Setting | Value | Why |
+|------|---------|-------|-----|
+| `WanVideoTextEncode` | `device` | `cpu` | Keeps T5 (~5.8 GB) off VRAM entirely |
+| `WanVideoTextEncode` | `force_offload` | `false` | Avoids 30+ min ROCm GPU→CPU transfer hang |
+| `WanVideoLoraSelect` | `merge_loras` | `false` | GGUF models cannot merge LoRAs |
+| `WanVideoBlockSwap` | `blocks_to_swap` | `0` | Block swap moves WAN blocks to CPU RAM as fp16 — OOM kills process on 15 GB RAM |
+| `WanVideoImageToVideoMultiTalk` | `tiled_vae` | `true` | Reduces VAE peak VRAM |
+| `WanVideoDecode` | `enable_vae_tiling` | `true` | Same |
 
-# Set up virtual environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+### VRAM Profile
 
-### Step 3: Scrape News (Optional)
-
-```bash
-python main.py scrape --llm
-python main.py fetch-content
-```
-
-### Step 4: Run the Server (Development)
-
-```bash
-source venv/bin/activate
-python -m src.server
-```
-
-### Step 5: Production Deployment with Gunicorn
-
-```bash
-pip install gunicorn
-gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
-```
-
-### Step 6: Set Up Nginx Reverse Proxy
-
-```bash
-# Create nginx config (replace yourdomain.com)
-cat > /etc/nginx/sites-available/harvey << 'EOF'
-server {
-    listen 80;
-    server_name yourdomain.com www.yourdomain.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:9090;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-EOF
-
-# Enable the site
-ln -s /etc/nginx/sites-available/harvey /etc/nginx/sites-enabled/
-nginx -t
-systemctl reload nginx
-```
-
-### Step 7: Set Up SSL (Let's Encrypt)
-
-```bash
-apt install -y certbot python3-certbot-nginx
-certbot --nginx -d yourdomain.com -d www.yourdomain.com
-```
-
-### Step 8: Keep Server Running with Systemd
-
-```bash
-cat > /etc/systemd/system/harvey.service << 'EOF'
-[Unit]
-Description=Harvey AI News
-After=network.target
-
-[Service]
-User=root
-WorkingDirectory=/opt/ai-harvey-news
-ExecStart=/opt/ai-harvey-news/venv/bin/gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable harvey
-systemctl start harvey
-```
-
-### Troubleshooting
-
-- Check server status: `systemctl status harvey`
-- View logs: `journalctl -u harvey -f`
-- Restart: `systemctl restart harvey`
-
----
-
-## Last Updated
-
-2026-03-19 - Added Neon Pulse UI with mobile and desktop templates
+| Stage | VRAM Used |
+|-------|-----------|
+| Model loading | ~15.5 GB |
+| Sampling (steady) | ~17 GB |
+| Sampling (peak) | ~18.6 GB |
 
 ---
 
@@ -346,72 +256,42 @@ ssh root@YOUR_SERVER_IP
 ### Step 2: Install Dependencies
 
 ```bash
-# Update and install Python
 apt update && apt install -y python3 python3-pip python3-venv git nginx
-
-# Clone the repository
 cd /opt
 git clone https://github.com/ssinjinx/ai-harvey-news.git
 cd ai-harvey-news
-
-# Set up virtual environment
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 3: Scrape News (Optional)
-
-```bash
-python main.py scrape --llm
-python main.py fetch-content
-```
-
-### Step 4: Run the Server (Development)
+### Step 3: Run the Server
 
 ```bash
 source venv/bin/activate
 python -m src.server
 ```
 
-### Step 5: Production Deployment with Gunicorn
+### Step 4: Production with Gunicorn + Nginx
 
 ```bash
 pip install gunicorn
 gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
 ```
 
-### Step 6: Set Up Nginx Reverse Proxy
-
-```bash
-# Create nginx config (replace yourdomain.com)
-cat > /etc/nginx/sites-available/harvey << 'EOF'
+```nginx
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
-
+    server_name yourdomain.com;
     location / {
         proxy_pass http://127.0.0.1:9090;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
-EOF
-
-# Enable the site
-ln -s /etc/nginx/sites-available/harvey /etc/nginx/sites-enabled/
-nginx -t
-systemctl reload nginx
 ```
 
-### Step 7: Set Up SSL (Let's Encrypt)
-
-```bash
-apt install -y certbot python3-certbot-nginx
-certbot --nginx -d yourdomain.com -d www.yourdomain.com
-```
-
-### Step 8: Keep Server Running with Systemd
+### Step 5: Systemd Service
 
 ```bash
 cat > /etc/systemd/system/harvey.service << 'EOF'
@@ -434,14 +314,8 @@ systemctl enable harvey
 systemctl start harvey
 ```
 
-### Troubleshooting
-
-- Check server status: `systemctl status harvey`
-- View logs: `journalctl -u harvey -f`
-- Restart: `systemctl restart harvey`
-
 ---
 
 ## Last Updated
 
-2026-03-19 - Added Neon Pulse UI with mobile and desktop templates
+2026-03-19 - Added InfiniteTalk video generation (ComfyUI talking-head widget, 240×416 portrait)
