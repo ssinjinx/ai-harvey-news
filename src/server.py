@@ -6,7 +6,16 @@ from flask import Flask, jsonify, render_template, send_file
 from .config import ARTICLES_PER_SECTION, CATEGORY_LABELS, SERVER_HOST, SERVER_PORT
 from .database import get_articles_by_category, get_article_by_id, update_article_content, init_db, get_all_categories
 from .scraper import fetch_full_article
-from .tts import generate_speech_for_article, get_audio_for_article, is_available as tts_is_available
+try:
+    from .tts import generate_speech_for_article, get_audio_for_article, is_available as tts_is_available
+except ImportError:
+    # Server without GPU/TTS dependencies
+    def generate_speech_for_article(article_id, text):
+        return None
+    def get_audio_for_article(article_id):
+        return None
+    def tts_is_available():
+        return False
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
