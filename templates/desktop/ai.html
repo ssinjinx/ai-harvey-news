@@ -226,6 +226,7 @@ function updatePlayButtons(isPlaying) {
 }
 
 function playFeaturedAudio(articleId) {
+    console.log('playFeaturedAudio called:', articleId);
     // If clicking the same article, toggle play/pause
     if (currentAudio && currentArticleId === articleId) {
         if (currentAudio.paused) {
@@ -249,17 +250,31 @@ function playFeaturedAudio(articleId) {
     const featuredStatus = document.getElementById('featured-audio-status-' + articleId);
     const harveyStatus = document.getElementById('harvey-audio-status');
 
+    if (harveyStatus) harveyStatus.textContent = 'Loading...';
+
     // Check if audio exists
     fetch('/article/' + articleId + '/audio/status')
-        .then(r => r.json())
+        .then(r => {
+            console.log('Status response:', r.status);
+            return r.json();
+        })
         .then(data => {
+            console.log('Status data:', data);
             if (data.available) {
                 // Audio exists, play it
+                console.log('Playing audio from /article/' + articleId + '/audio');
                 currentAudio = new Audio('/article/' + articleId + '/audio');
-                currentAudio.play();
-                updatePlayButtons(true);
+                currentAudio.play()
+                    .then(() => {
+                        console.log('Audio started playing');
+                        updatePlayButtons(true);
+                        if (harveyStatus) harveyStatus.textContent = 'Playing...';
+                    })
+                    .catch(err => {
+                        console.error('Audio play error:', err);
+                        if (harveyStatus) harveyStatus.textContent = 'Play error';
+                    });
                 if (featuredStatus) featuredStatus.classList.add('hidden');
-                if (harveyStatus) harveyStatus.textContent = 'Playing...';
 
                 currentAudio.onended = function() {
                     updatePlayButtons(false);
@@ -307,6 +322,10 @@ function playFeaturedAudio(articleId) {
                 }
                 if (harveyStatus) harveyStatus.textContent = 'Not available';
             }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            if (harveyStatus) harveyStatus.textContent = 'Error: ' + err.message;
         });
 }
 </script>
