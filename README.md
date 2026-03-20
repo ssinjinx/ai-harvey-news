@@ -88,6 +88,7 @@ ai-harvey-news/
 ├── comfyui/
 │   ├── workflow_api.json    # ComfyUI InfiniteTalk workflow (API format)
 │   ├── submit.py            # Script to submit video generation jobs
+│   ├── start_comfyui.sh     # Start ComfyUI with AMD ROCm env vars
 │   ├── harveycyborg.png     # Harvey reference face image
 │   └── harveyclip_5s.wav    # Harvey voice reference clip (5s)
 └── requirements.txt
@@ -157,20 +158,59 @@ Place in your ComfyUI model directories:
 - [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
 - [ComfyUI_KJNodes](https://github.com/kijai/ComfyUI_KJNodes)
 
-### Usage
+### Starting ComfyUI
 
 ```bash
-cd comfyui/
+# Start ComfyUI with AMD ROCm env vars (from anywhere)
+bash ~/ai-harvey-news/comfyui/start_comfyui.sh
 
-# Submit with defaults (harveycyborg.png + harveyclip_5s.wav, 240x416)
+# Or if ComfyUI is somewhere else:
+COMFYUI_DIR=/path/to/ComfyUI bash ~/ai-harvey-news/comfyui/start_comfyui.sh
+```
+
+ComfyUI will be available at `http://localhost:8188`.
+
+Key flags set by the script:
+- `HSA_OVERRIDE_GFX_VERSION=11.0.0` — required for RX 7900 XTX on ROCm
+- `PYTORCH_ALLOC_CONF=expandable_segments:True` — prevents VRAM fragmentation
+- `python3 -u` — unbuffered output so logs appear in real time (needed for debugging hangs)
+- `--use-sage-attention` — faster attention for AMD
+
+### Adding Input Files
+
+Place files in `~/ComfyUI/input/` before submitting:
+
+```bash
+# Face image (reference for the talking head)
+cp myface.png ~/ComfyUI/input/
+
+# Audio clip (the voice Harvey will lip-sync to)
+cp myscript.wav ~/ComfyUI/input/
+```
+
+The workflow references files by filename only — no path needed in the JSON.
+
+To trim audio to a specific length (requires ffmpeg):
+```bash
+ffmpeg -i full_audio.wav -t 5 -c copy harveyclip_5s.wav
+```
+
+### Submitting a Job
+
+```bash
+cd ~/ai-harvey-news/comfyui/
+
+# Use defaults (harveycyborg.png + harveyclip_5s.wav, 240x416)
 python submit.py
 
-# Custom inputs
-python submit.py --image myface.png --audio myclip.wav
+# Custom face + audio
+python submit.py --image myface.png --audio myscript.wav
 
-# Different resolution (keep portrait — height must be > width)
-python submit.py --width 480 --height 832
+# Different resolution (portrait only — height must be > width)
+python submit.py --width 480 --height 832 --prefix MyOutput
 ```
+
+Output video lands in `~/ComfyUI/output/` with the prefix you specified.
 
 ### Critical Settings (AMD ROCm / 15 GB RAM)
 
