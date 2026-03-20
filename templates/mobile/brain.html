@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}HARVEY AI | The Brain{% endblock %}
+{% block body %}
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl border-b border-[#414754]/15 shadow-[0_8_32px_rgba(0,0,0,0.4)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#acc7ff] text-xl" data-icon="memory">memory</span>
+<h1 class="font-['Space_Grotesk'] tracking-wider uppercase text-sm font-bold text-[#acc7ff] italic">HARVEY AI</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 font-label text-xs tracking-widest uppercase">
+<a class="text-[#414754] hover:text-[#acc7ff] transition-all" href="/brain/">The Brain</a>
+<a class="text-[#414754] hover:text-[#acc7ff] transition-all" href="#">Network</a>
+<a class="text-[#414754] hover:text-[#acc7ff] transition-all" href="#">Manifesto</a>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+<img alt="AI Assistant Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4rScFlRF0HRMjZHny_ySpgpJi6zRqxBxoYY_Jz10pKhMlL3oDPZejgd6y2KzOTGyn_314Cu-0BYhrzT_VAorj-wh8pe4CJng2T766cY5zu_ru2n_uBinbrdGBovsKdZTDjz3J3broYgYBs6R9F7dslm3DhCTEttJZf8UMvslnS18_S1P8_5RoWrFZkE4OLFolRNyhun_hVWNIppjl6LM3wP27ri7kVnheA2Ol9acIZxh8DpEvBEBF3CjvBkhzFP9Zr0RH7ZfHbw"/>
+</div>
+</div>
+</header>
+
+<main class="pt-24 px-6 max-w-7xl mx-auto">
+<!-- Hero Section: The Pulse -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-center">
+<div class="lg:col-span-5 space-y-6">
+<div class="inline-flex items-center px-3 py-1 rounded-full bg-tertiary/10 border border-tertiary/20 text-tertiary font-label text-[10px] tracking-widest uppercase">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-2 animate-pulse"></span>
+System Online: Curating Now
+</div>
+<h2 class="font-headline text-5xl md:text-6xl font-bold tracking-tighter leading-none">
+Meet the <span class="text-primary italic">Ghost</span> in the Machine.
+</h2>
+<p class="text-on-surface-variant text-lg max-w-md leading-relaxed">
+Harvey isn't just an algorithm. It's a synthetic editor that scans millions of signals to find the truth hidden in the noise.
+</p>
+<div class="flex gap-4">
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed px-6 py-3 rounded-xl font-label font-bold uppercase tracking-wider text-sm hover:brightness-110 transition-all neon-glow-primary">
+Initialize Sync
+</button>
+<button class="border border-outline-variant/30 px-6 py-3 rounded-xl font-label font-bold uppercase tracking-wider text-sm hover:bg-surface-container transition-all">
+View Sources
+</button>
+</div>
+</div>
+<!-- Central AI Avatar -->
+<div class="lg:col-span-7 flex justify-center items-center relative py-12">
+<div class="absolute inset-0 bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="relative w-64 h-64 md:w-96 md:h-96 flex items-center justify-center">
+<!-- Rotating Rings -->
+<div class="absolute inset-0 border-[1px] border-primary/20 rounded-full animate-spin" style="animation-duration: 10s;"></div>
+<div class="absolute inset-4 border-[1px] border-secondary/20 rounded-full animate-spin" style="animation-duration: 15s; animation-direction: reverse;"></div>
+<div class="absolute inset-10 border-[1px] border-tertiary/20 rounded-full animate-spin" style="animation-duration: 20s;"></div>
+<!-- Core -->
+<div class="w-48 h-48 md:w-64 md:h-64 rounded-full glass-panel border border-primary/30 flex items-center justify-center neon-glow-primary" style="animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
+<span class="material-symbols-outlined text-7xl md:text-9xl text-primary" data-icon="model_training" style="font-variation-settings: 'FILL' 1;">model_training</span>
+</div>
+<!-- Floating Data Points -->
+<div class="absolute top-0 right-0 glass-panel p-3 rounded-xl border border-tertiary/30 neon-glow-primary translate-x-8 -translate-y-4">
+<span class="font-label text-[10px] text-tertiary block mb-1">SENTIMENT</span>
+<div class="h-1.5 w-24 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-4/5"></div>
+</div>
+</div>
+<div class="absolute bottom-12 left-0 glass-panel p-3 rounded-xl border border-secondary/30 -translate-x-12">
+<span class="font-label text-[10px] text-secondary block mb-1">SIGNAL STRENGTH</span>
+<div class="flex gap-1">
+<div class="w-1 h-3 bg-secondary rounded-full"></div>
+<div class="w-1 h-5 bg-secondary rounded-full"></div>
+<div class="w-1 h-8 bg-secondary rounded-full"></div>
+<div class="w-1 h-4 bg-secondary/30 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Bento Grid Dashboard -->
+<section class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12">
+<!-- Analyzing Status -->
+<div class="md:col-span-2 lg:col-span-2 glass-panel p-6 rounded-xl border border-outline-variant/15 flex flex-col justify-between">
+<div>
+<h3 class="font-label text-xs text-primary mb-4 tracking-widest uppercase">Live Process</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="font-headline text-2xl font-bold">Scanning</span>
+<span class="font-label text-tertiary text-sm">ACTIVE</span>
+</div>
+<div class="text-4xl font-headline font-black text-on-surface">12,482+</div>
+<p class="text-on-surface-variant text-sm">Global sources indexed in the last 60 seconds.</p>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/10">
+<div class="flex items-center gap-2 text-xs text-on-surface-variant font-label">
+<span class="material-symbols-outlined text-sm" data-icon="cloud_sync">cloud_sync</span>
+Latency: 14ms
+</div>
+</div>
+</div>
+
+<!-- Neon Chart: Interest Over Time -->
+<div class="md:col-span-2 lg:col-span-4 glass-panel p-6 rounded-xl border border-outline-variant/15 relative overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="font-label text-xs text-secondary mb-1 tracking-widest uppercase">Global Interest</h3>
+<p class="font-headline text-xl font-bold">AI Narrative Pulse</p>
+</div>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+</div>
+<!-- Visual Chart Representation -->
+<div class="h-32 flex items-end gap-1 px-2">
+<div class="flex-1 bg-primary/20 rounded-t-lg h-1/2 hover:bg-primary/40 transition-all"></div>
+<div class="flex-1 bg-primary/20 rounded-t-lg h-2/3 hover:bg-primary/40 transition-all"></div>
+<div class="flex-1 bg-primary/20 rounded-t-lg h-3/4 hover:bg-primary/40 transition-all"></div>
+<div class="flex-1 bg-primary/40 rounded-t-lg h-full neon-glow-primary transition-all"></div>
+<div class="flex-1 bg-primary/20 rounded-t-lg h-4/5 hover:bg-primary/40 transition-all"></div>
+<div class="flex-1 bg-secondary/20 rounded-t-lg h-1/2 hover:bg-secondary/40 transition-all"></div>
+<div class="flex-1 bg-secondary/20 rounded-t-lg h-2/3 hover:bg-secondary/40 transition-all"></div>
+<div class="flex-1 bg-secondary/40 rounded-t-lg h-4/5 transition-all"></div>
+<div class="flex-1 bg-secondary/20 rounded-t-lg h-3/4 hover:bg-secondary/40 transition-all"></div>
+<div class="flex-1 bg-primary/20 rounded-t-lg h-2/3 hover:bg-primary/40 transition-all"></div>
+</div>
+<div class="mt-4 flex justify-between text-[10px] font-label text-outline uppercase tracking-widest">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>Now</span>
+</div>
+</div>
+
+<!-- Sentiment Analysis -->
+<div class="md:col-span-4 lg:col-span-3 glass-panel p-8 rounded-xl border border-outline-variant/15">
+<h3 class="font-label text-xs text-tertiary mb-6 tracking-widest uppercase">Emotional Intelligence</h3>
+<div class="grid grid-cols-3 gap-4">
+<div class="text-center">
+<div class="text-3xl font-headline font-bold text-tertiary mb-1">72%</div>
+<div class="text-[10px] font-label text-outline uppercase">Optimism</div>
+</div>
+<div class="text-center border-x border-outline-variant/15">
+<div class="text-3xl font-headline font-bold text-secondary mb-1">18%</div>
+<div class="text-[10px] font-label text-outline uppercase">Caution</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-headline font-bold text-primary mb-1">10%</div>
+<div class="text-[10px] font-label text-outline uppercase">Hype</div>
+</div>
+</div>
+<div class="mt-8 space-y-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
+<div class="flex-1">
+<div class="flex justify-between text-[10px] font-label mb-1">
+<span class="text-on-surface">Curating Quality...</span>
+<span class="text-tertiary">98.2%</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[98.2%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Interactive AI Concept -->
+<div class="md:col-span-4 lg:col-span-3 bg-gradient-to-br from-surface-container-high to-surface-container-lowest p-8 rounded-xl border border-primary/10 relative overflow-hidden group">
+<div class="relative z-10">
+<h3 class="font-headline text-2xl font-bold mb-4">How it works?</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6">
+Harvey uses <span class="text-primary font-bold">Vector Embedding</span> to understand not just the words, but the <span class="italic text-secondary">soul</span> of the news. It filters out the noise and brings you the signal.
+</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-label border border-primary/20 uppercase tracking-tighter">Natural Language</span>
+<span class="px-3 py-1 bg-secondary/10 text-secondary rounded-full text-[10px] font-label border border-secondary/20 uppercase tracking-tighter">Pattern Recognition</span>
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary rounded-full text-[10px] font-label border border-tertiary/20 uppercase tracking-tighter">Zero Bias</span>
+</div>
+</div>
+<!-- Abstract visual element -->
+<div class="absolute -right-12 -bottom-12 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-all"></div>
+<div class="absolute right-8 top-8 opacity-20 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+</section>
+
+<!-- Fun Tech Section -->
+<section class="mb-24">
+<div class="text-center mb-12">
+<h2 class="font-headline text-3xl font-bold mb-2 uppercase tracking-tight">The Neural Pipeline</h2>
+<div class="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Step 1 -->
+<div class="text-center space-y-4 px-4">
+<div class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mx-auto border border-outline-variant/30 text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="waves">waves</span>
+</div>
+<h4 class="font-headline font-bold text-xl">The Ingest</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+Harvey swallows the internet whole—RSS, Twitter, obscure blogs, and research papers.
+</p>
+</div>
+<!-- Step 2 -->
+<div class="text-center space-y-4 px-4">
+<div class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mx-auto border border-outline-variant/30 text-secondary">
+<span class="material-symbols-outlined text-3xl" data-icon="filter_alt">filter_alt</span>
+</div>
+<h4 class="font-headline font-bold text-xl">The Distill</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+Removing the fluff. Harvey identifies clickbait, duplicate reports, and factual inconsistencies.
+</p>
+</div>
+<!-- Step 3 -->
+<div class="text-center space-y-4 px-4">
+<div class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mx-auto border border-outline-variant/30 text-tertiary">
+<span class="material-symbols-outlined text-3xl" data-icon="auto_graph">auto_graph</span>
+</div>
+<h4 class="font-headline font-bold text-xl">The Insight</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+Connecting the dots. Harvey finds how a tech leak today affects the market tomorrow.
+</p>
+</div>
+</div>
+</section>
+</main>
+
+<!-- BottomNavBar (Mobile Shell Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-4 pb-safe bg-[#1b2026]/70 backdrop-blur-[20px] border-t border-[#414754]/15 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors" href="/mobile/">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Stream</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#acc7ff] bg-[#acc7ff]/10 rounded-xl px-4 py-1 border-b-2 border-[#acc7ff]" href="/brain/">
+<span class="material-symbols-outlined" data-icon="Electric_Bolt">electric_bolt</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Pulse</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Studio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="bookmarks">bookmarks</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Library</span>
+</a>
+</nav>
+
+<!-- Background Decor Elements -->
+<div class="fixed top-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+<div class="fixed bottom-1/4 -right-20 w-80 h-80 bg-secondary/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+<div class="fixed top-0 right-0 w-full h-full pointer-events-none -z-20 opacity-20">
+<div class="absolute inset-0 bg-[radial-gradient(#414754_1px,transparent_1px)] [background-size:40px_40px]"></div>
+</div>
+
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+</style>
+{% endblock %}

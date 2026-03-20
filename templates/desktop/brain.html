@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}NEON PULSE | The Brain{% endblock %}
+{% block body %}
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_8_32px_rgba(0,0,0,0.4)]">
+<div class="text-2xl font-bold tracking-tighter text-blue-400 font-headline uppercase">NEON PULSE</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-headline uppercase tracking-wider text-sm text-blue-400 border-b-2 border-blue-400 pb-1" href="/home/">Intelligence</a>
+<a class="font-headline uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Markets</a>
+<a class="font-headline uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Ethics</a>
+<a class="font-headline uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Hardware</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-white/5 transition-all duration-300 active:scale-95 text-blue-400">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-white/5 transition-all duration-300 active:scale-95 text-blue-400">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 h-[1px] w-full absolute bottom-0"></div>
+</nav>
+
+<!-- Side Navigation Bar -->
+<aside class="hidden lg:flex flex-col pt-24 h-screen bg-[#171c22] w-64 fixed left-0 top-0 border-r border-white/5 z-40">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+</div>
+<div>
+<div class="text-lg font-black text-blue-400 font-headline">HARVEY_v2.1</div>
+<div class="text-[10px] uppercase tracking-widest text-tertiary font-label">AI Sentinel Status: Active</div>
+</div>
+</div>
+<div class="h-px bg-white/5 w-full"></div>
+</div>
+<nav class="flex flex-col">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-headline font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1" href="/home/">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span>Live Stream</span>
+</a>
+<a class="bg-blue-500/10 text-blue-400 border-l-4 border-blue-400 flex items-center gap-4 px-6 py-4 font-headline font-medium text-xs active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span>Deep Dive</span>
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-headline font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Archives</span>
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-headline font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span>Labs</span>
+</a>
+<div class="mt-auto pb-8">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-headline font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</nav>
+</aside>
+
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 px-8 pb-12 min-h-screen bg-surface">
+
+<!-- Header Section -->
+<header class="mb-12">
+<div class="flex items-center gap-4 mb-2">
+<span class="h-[2px] w-12 bg-primary"></span>
+<span class="text-primary font-headline text-sm tracking-[0.2em] uppercase">The Brain / Neural Mapping</span>
+</div>
+<h1 class="text-5xl font-headline font-bold text-on-surface tracking-tighter max-w-2xl leading-none">
+Synthetic Curation <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Process Node</span>
+</h1>
+</header>
+
+<!-- Bento Grid: The Ingest, Distill, Insight -->
+<div class="grid grid-cols-12 gap-6 mb-12">
+
+<!-- Column 1: THE INGEST -->
+<div class="col-span-12 md:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container p-6 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="cloud_download">cloud_download</span>
+</div>
+<div class="flex items-center justify-between mb-6">
+<div class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-headline text-primary tracking-widest uppercase">Phase 01</div>
+<span class="text-tertiary text-xs font-label">LIVE FLOW</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-2">THE INGEST</h3>
+<p class="text-on-surface-variant text-sm font-body mb-6 leading-relaxed">Aggregating 4.2M data points per second from global news nodes and research repositories.</p>
+<!-- Stream Visualization -->
+<div class="space-y-2">
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[65%] bg-primary"></div>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[85%] bg-primary/60"></div>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[45%] bg-primary/40"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
+<span class="text-xs font-label text-on-surface-variant uppercase tracking-widest">Active Sources</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-xs">
+<span class="text-on-surface/60 font-body">Scientific Journals</span>
+<span class="text-primary font-label">12,403</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-on-surface/60 font-body">Market Exchanges</span>
+<span class="text-primary font-label">248</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-on-surface/60 font-body">Social Aggregators</span>
+<span class="text-primary font-label">1.2M</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Column 2: THE DISTILL -->
+<div class="col-span-12 md:col-span-5 flex flex-col gap-6">
+<div class="bg-surface-container-highest p-8 rounded-xl border-l-4 border-secondary relative overflow-hidden flex-grow">
+<div class="absolute -bottom-8 -right-8 w-48 h-48 bg-secondary/5 blur-[60px] rounded-full"></div>
+<div class="flex items-center justify-between mb-8">
+<div class="px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-full text-[10px] font-headline text-secondary tracking-widest uppercase">Phase 02</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-label text-on-surface-variant uppercase">Efficiency</span>
+<span class="text-secondary font-bold">99.8%</span>
+</div>
+</div>
+<h3 class="text-3xl font-headline font-bold mb-4 tracking-tight">THE DISTILL</h3>
+<p class="text-on-surface-variant text-base font-body mb-8">Harvey synthesizes conflicting narratives using multi-agent debate protocols to extract objective truth signals.</p>
+<!-- Circular Progress -->
+<div class="flex justify-center py-4">
+<div class="relative w-40 h-40 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-white/5" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="2"></circle>
+<circle class="text-secondary" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="88" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-4xl" data-icon="filter_center_focus">filter_center_focus</span>
+<span class="text-[10px] font-label text-on-surface-variant mt-2">PROCESSING</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Column 3: THE INSIGHT -->
+<div class="col-span-12 md:col-span-3 flex flex-col gap-6">
+<div class="bg-surface-container p-6 rounded-xl border-t border-white/5">
+<div class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full text-[10px] font-headline text-tertiary tracking-widest uppercase inline-block mb-4">Phase 03</div>
+<h3 class="text-xl font-headline font-bold mb-2">THE INSIGHT</h3>
+<div class="mt-4 p-4 bg-surface-container-lowest rounded-lg">
+<div class="text-[10px] font-label text-on-surface-variant uppercase mb-2">Latest Deduction</div>
+<p class="text-xs text-on-surface font-body italic">"Silicon-photonics scaling will outpace HBM bandwidth by Q3..."</p>
+</div>
+</div>
+<div class="bg-gradient-to-br from-primary to-primary-container p-6 rounded-xl text-on-primary-fixed shadow-[0px_8px_32px_rgba(172,199,255,0.2)]">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xs font-headline font-bold uppercase tracking-tighter">AI Pulse Result</span>
+</div>
+<div class="text-4xl font-headline font-black mb-1">84%</div>
+<div class="text-[10px] font-label uppercase tracking-widest opacity-80">Sentiment Accuracy</div>
+<button class="w-full mt-6 py-3 bg-on-primary-fixed text-primary-fixed font-headline font-bold text-xs uppercase tracking-widest rounded-lg hover:brightness-110 transition-all active:scale-95">
+Download Report
+</button>
+</div>
+</div>
+</div>
+
+<!-- Secondary Section: Advanced Analytics -->
+<div class="grid grid-cols-12 gap-6">
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-8">
+<div class="flex items-center justify-between mb-8">
+<h4 class="text-xl font-headline font-bold tracking-tight">Curation Velocity Tracking</h4>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-[10px] font-label uppercase text-on-surface-variant">Ingest</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-[10px] font-label uppercase text-on-surface-variant">Distill</span>
+</div>
+</div>
+</div>
+<!-- Mock Chart Area -->
+<div class="h-64 flex items-end justify-between gap-2 px-4 border-b border-white/5">
+<div class="w-full bg-primary/20 h-[40%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[55%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+<div class="w-full bg-primary/20 h-[70%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[45%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+<div class="w-full bg-primary/20 h-[90%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[65%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+<div class="w-full bg-primary/20 h-[30%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[80%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+<div class="w-full bg-primary/20 h-[50%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[95%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+<div class="w-full bg-primary/20 h-[60%] rounded-t-sm hover:bg-primary/40 transition-colors"></div>
+<div class="w-full bg-secondary/20 h-[40%] rounded-t-sm hover:bg-secondary/40 transition-colors"></div>
+</div>
+<div class="flex justify-between mt-4 px-4 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>23:59</span>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container rounded-xl p-6">
+<h4 class="font-headline font-bold text-sm mb-4 uppercase tracking-widest text-primary">System Integrity</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-body text-on-surface-variant">Neural Synapse Load</span>
+<span class="text-xs font-label text-tertiary">Normal</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[32%] bg-tertiary"></div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<span class="text-xs font-body text-on-surface-variant">Inference Latency</span>
+<span class="text-xs font-label text-secondary">14ms</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[12%] bg-secondary"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-primary/5">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
+<span class="font-headline font-bold text-sm uppercase tracking-widest">Active Model</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs font-body text-on-surface-variant">Version</span>
+<span class="text-xs font-label text-on-surface">HARVEY-ULTRA-v2</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<!-- Background Decoration -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 opacity-20">
+<div class="absolute top-[10%] right-[5%] w-[40rem] h-[40rem] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[10%] left-[20%] w-[30rem] h-[30rem] bg-secondary/5 blur-[100px] rounded-full"></div>
+</div>
+{% endblock %}

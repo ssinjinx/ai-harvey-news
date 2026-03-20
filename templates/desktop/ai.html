@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}NEON PULSE | AI Intelligence{% endblock %}
+{% block body %}
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_8_32px_rgba(0,0,0,0.4)]">
+<div class="text-2xl font-bold tracking-tighter text-blue-400 font-headline uppercase">NEON PULSE</div>
+<nav class="hidden md:flex gap-8 font-['Space_Grotesk'] uppercase tracking-wider text-sm">
+<a class="text-slate-400 hover:text-blue-200 transition-colors" href="/home/">Intelligence</a>
+<a class="text-blue-400 border-b-2 border-blue-400 pb-1" href="#">Markets</a>
+<a class="text-slate-400 hover:text-blue-200 transition-colors" href="#">Ethics</a>
+<a class="text-slate-400 hover:text-blue-200 transition-colors" href="#">Hardware</a>
+</nav>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-lowest border-none rounded-xl pl-10 pr-4 py-2 text-xs font-label tracking-widest focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="TERMINAL SEARCH..." type="text"/>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-blue-400 cursor-pointer active:scale-95 duration-200" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-blue-400 cursor-pointer active:scale-95 duration-200" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 h-[1px] w-full absolute bottom-0"></div>
+</header>
+
+<!-- Side Navigation Bar -->
+<aside class="hidden lg:flex flex-col pt-24 h-screen bg-[#171c22] w-64 fixed left-0 top-0 border-r border-white/5 z-40">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary p-[1px]">
+<div class="w-full h-full rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0BqYFWmhv9MrPtxnBayvkIy0_b0J9AtMFoggx8Sie3mSS95fTb0CB2tH5gbKsMStVL1iOnkRfxQj5qyJRz_tTuaNsffLQpewCT0TUd--fRqtHwUojFjSyd70u54c5hh3ldntfnrhR91-LyhyhC4ZLromPb0tmyVXFq0poK4DFcrbogW65QdRmGW_PRykoSsTiYTHPBkUieD39q7KsOJQuhkcgzPovaO6evUbqBUi5E02yCzx7aGdyGmq7tngrEXco7UWl4fZykg"/>
+</div>
+</div>
+<div>
+<h3 class="font-headline font-black text-blue-400 text-sm tracking-tighter">HARVEY_v2.1</h3>
+<p class="font-label text-[10px] text-tertiary flex items-center gap-1 uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span> Active
+</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col font-['Space_Grotesk'] font-medium text-xs">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="/home/">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span> Live Stream
+</a>
+<a class="bg-blue-500/10 text-blue-400 border-l-4 border-blue-400 flex items-center gap-4 px-6 py-4 active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="psychology" style="font-variation-settings: 'FILL' 1;">psychology</span> Deep Dive
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span> Archives
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="#">
+<span class="material-symbols-outlined" data-icon="science">science</span> Labs
+</a>
+<div class="mt-auto mb-6">
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 active:translate-x-1 transition-transform hover:text-blue-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> Settings
+</a>
+</div>
+</nav>
+</aside>
+
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-28 px-8 pb-12 min-h-screen">
+
+<!-- Hero Analysis Section -->
+{% set featured = articles[0] if articles else none %}
+<section class="grid grid-cols-12 gap-6 mb-12">
+<div class="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-xl bg-surface-container">
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent z-10"></div>
+<img class="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105 opacity-60" data-alt="Neural network" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGyQFmJ8IKTqwefbTWP2-ko_D2SDzOyS_SFaEMZlUVtRNA3d7TQligloSwIgp4O8D13L2bm_b40YEu83K7ZTcrVBKCxEWI4hFwtllSZtHGwvIxdt05IQKDc0W4aYTPnhZBaXLWR1rXub3rdoVO8MAIipM0ZNAUVfp89EqYnCOLixp2xFkBAF0h6wA_NCBasBJDYkagQZbflfVxcwDRGcOKnSwO8mafBJLd-UnqS5AK5rX3wlpmhROHPJ77lZ5EcLXrA4J1NdpRaw"/>
+<div class="absolute bottom-0 left-0 p-10 z-20 max-w-2xl">
+<div class="flex gap-3 mb-4">
+<span class="px-3 py-1 bg-tertiary rounded-full text-on-tertiary font-label text-[10px] font-bold uppercase tracking-widest">Harvey's Pick</span>
+<span class="px-3 py-1 bg-secondary-container rounded-full text-on-secondary-container font-label text-[10px] font-bold uppercase tracking-widest">Neural Analysis</span>
+</div>
+{% if featured %}
+<h1 class="font-headline text-5xl font-bold text-white mb-4 leading-[0.9] tracking-tighter">{{ featured.title[:80] + '...' if featured.title|length > 80 else featured.title }}</h1>
+{% if featured.summary %}
+<p class="text-on-surface-variant text-lg leading-relaxed mb-6 font-light">{{ featured.summary[:200] + '...' if featured.summary|length > 200 else featured.summary }}</p>
+{% endif %}
+<a href="/article/{{ featured.id }}" class="flex items-center gap-3 bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed px-8 py-4 rounded-xl font-headline font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-[0_0_20px_rgba(172,199,255,0.2)]">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span> Read Deep Dive Analysis
+</a>
+{% else %}
+<h1 class="font-headline text-5xl font-bold text-white mb-4 leading-[0.9] tracking-tighter">THE SILICON CONSCIOUSNESS: DEBUNKING THE LLM CEILING.</h1>
+{% endif %}
+</div>
+</div>
+
+<!-- Harvey Audio Player Widget -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-8 flex flex-col justify-between border border-white/5">
+<div>
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-headline text-xl font-bold text-primary tracking-tight">HARVEY_AUDIO</h2>
+<p class="font-label text-[10px] text-outline tracking-widest uppercase">Synthetic Briefing v21.4</p>
+</div>
+<span class="material-symbols-outlined text-primary text-3xl animate-pulse" data-icon="graphic_eq">graphic_eq</span>
+</div>
+<div class="mb-8">
+<p class="text-xs font-label text-outline mb-2 uppercase tracking-widest">Now Decrypting:</p>
+<h3 class="text-xl font-headline font-medium text-on-surface leading-tight">The Quantum Leap in Token Efficiency</h3>
+</div>
+<div class="space-y-4 mb-8">
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3 shadow-[0_0_10px_rgba(172,199,255,0.5)]"></div>
+</div>
+<div class="flex justify-between font-label text-[10px] text-outline">
+<span>04:22</span>
+<span>06:45</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center gap-8">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="skip_previous">skip_previous</span>
+</button>
+<button class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary-container shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-4xl" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="skip_next">skip_next</span>
+</button>
+</div>
+</div>
+</section>
+
+<!-- Bento Grid Feed -->
+<h2 class="font-headline text-2xl font-bold mb-8 flex items-center gap-4 tracking-tighter uppercase">
+Intelligence Stream <span class="h-[1px] flex-grow bg-gradient-to-r from-outline-variant/30 to-transparent"></span>
+</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% for article in articles[1:] %}
+<!-- Article Card -->
+<div class="bg-surface-container rounded-xl overflow-hidden group border border-transparent hover:border-primary/10 transition-all duration-300">
+<div class="h-48 relative overflow-hidden">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Tech" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1p7y3JYOgD-X-sF3ynj1zwYTrY75mH5EPCGlw0ekZ8kQ2RBsj5neLlxTbzZtBWMiROuHzZKWyyHqYQkOzNiR-V_vMnWB98G4tlpCw3fCHCTx4DHADyhP-MrXzTW8N2cFrh9mP1XPk3ibleK7UpLWpIn_QvKo6jiAL9jSTPI4RRUffpTpQxR1QJbaCKouk-zPE0-_iE4g1Uscu5KjV_pr39a2_9mJdbjg8sA6XWdxmkcFhrts_X9XbFZoWtc-xBxz_WFBpC0mOPA"/>
+<div class="absolute top-4 left-4">
+<span class="px-2 py-1 bg-surface-container-lowest/80 backdrop-blur-md rounded text-[9px] font-label text-tertiary font-bold uppercase border border-tertiary/20">High Reliability</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-center mb-3">
+<span class="text-[10px] font-label text-outline uppercase tracking-widest">AI Analysis</span>
+<span class="text-[10px] font-label text-outline uppercase">{{ article.source }}</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-3 group-hover:text-primary transition-colors leading-snug">
+<a href="/article/{{ article.id }}">{{ article.title[:60] + '...' if article.title|length > 60 else article.title }}</a>
+</h3>
+{% if article.summary %}
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2 font-light">{{ article.summary[:120] + '...' if article.summary|length > 120 else article.summary }}</p>
+{% endif %}
+<div class="pt-4 border-t border-white/5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="biotech">biotech</span>
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest">Harvey Analysis Available</span>
+</div>
+<a href="/article/{{ article.id }}" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="arrow_forward">arrow_forward</a>
+</div>
+</div>
+</div>
+{% else %}
+<div class="col-span-3 text-center py-12 text-outline">
+<p class="font-headline">No AI articles yet. Run <code>python main.py scrape</code> to fetch news.</p>
+</div>
+{% endfor %}
+</div>
+
+<!-- Harvey's Intelligence Insight Banner -->
+<section class="mt-12 bg-surface-container-low rounded-xl p-8 relative overflow-hidden border border-primary/5">
+<div class="absolute -right-20 -top-20 w-80 h-80 bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+<div class="w-24 h-24 flex-shrink-0 bg-surface-container-highest rounded-2xl flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-primary text-5xl" data-icon="psychology_alt">psychology_alt</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline text-2xl font-bold text-white mb-2 tracking-tight uppercase">Sentinel Sentiment Report</h3>
+<p class="text-on-surface-variant max-w-2xl font-light">"Current market trends suggest a 72% probability of a hardware consolidation phase in the next 180 days. I recommend monitoring the 'Labs' tab for my projected outcomes on decentralized compute protocols."</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 border border-outline-variant rounded-xl font-label text-[11px] font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">View Projection</button>
+<button class="px-6 py-3 bg-secondary text-on-secondary rounded-xl font-label text-[11px] font-bold uppercase tracking-widest hover:brightness-110 transition-colors">Download PDF</button>
+</div>
+</div>
+</section>
+</main>
+{% endblock %}

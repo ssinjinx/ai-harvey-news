@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}NEON PULSE | AI Harvey Global News Feed{% endblock %}
+{% block extra_head %}
+<style>
+</style>
+{% endblock %}
+{% block body %}
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl shadow-[0_8_32px_rgba(0,0,0,0.4)] flex justify-between items-center px-8 h-20">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-blue-400 font-['Space_Grotesk']">NEON PULSE</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-blue-400 border-b-2 border-blue-400 pb-1" href="/home/">Intelligence</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Markets</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Ethics</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-wider text-sm text-slate-400 hover:text-blue-200 transition-colors" href="#">Hardware</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<input class="bg-surface-container-lowest border-none text-xs font-label py-2 px-4 w-64 rounded-xl focus:ring-2 focus:ring-primary transition-all" placeholder="QUERY NETWORK..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+</div>
+<button class="p-2 hover:bg-white/5 rounded-full transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined text-blue-400" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-white/5 rounded-full transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined text-blue-400" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 h-[1px] w-full absolute bottom-0"></div>
+</nav>
+
+<!-- Side Navigation Drawer -->
+<aside class="hidden lg:flex flex-col pt-24 h-screen bg-[#171c22] w-64 fixed left-0 top-0 border-r border-white/5 z-40">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center p-[2px]">
+<div class="w-full h-full bg-surface-container rounded-[7px] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+</div>
+<div>
+<h2 class="text-lg font-black text-blue-400 font-['Space_Grotesk']">HARVEY_v2.1</h2>
+<p class="text-[10px] text-tertiary font-label tracking-widest uppercase">AI Sentinel Status: Active</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto custom-scrollbar">
+<a class="bg-blue-500/10 text-blue-400 border-l-4 border-blue-400 flex items-center gap-4 px-6 py-4 font-['Space_Grotesk'] font-medium text-xs active:translate-x-1 transition-transform" href="/home/">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span class="uppercase tracking-widest">Live Stream</span>
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-['Space_Grotesk'] font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1 transition-transform" href="/brain/">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="uppercase tracking-widest">Deep Dive</span>
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-['Space_Grotesk'] font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="uppercase tracking-widest">Archives</span>
+</a>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-['Space_Grotesk'] font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span class="uppercase tracking-widest">Labs</span>
+</a>
+<div class="bg-[#1b2026] mb-2 h-[1px] mx-6 my-4 opacity-20"></div>
+<a class="text-slate-500 flex items-center gap-4 px-6 py-4 hover:bg-white/5 font-['Space_Grotesk'] font-medium text-xs hover:text-blue-300 transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="uppercase tracking-widest">Settings</span>
+</a>
+</nav>
+<div class="p-6">
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/15">
+<p class="text-[10px] text-outline font-label mb-2 uppercase tracking-tighter">Current Neural Load</p>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[64%] shadow-[0_0_8px_#acc7ff]"></div>
+</div>
+</div>
+</div>
+</aside>
+
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 px-6 pb-12">
+
+<!-- Viral Story Hero Section -->
+{% set featured = sections.get('global', {}).get('articles', [])[0] if sections.get('global', {}).get('articles') else none %}
+<section class="relative mb-12 rounded-3xl overflow-hidden min-h-[500px] flex items-end group">
+<div class="absolute inset-0 z-0">
+{% if featured %}
+<img class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700 opacity-60" data-alt="Futuristic cyborg news caster" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1KJjvUxY27pL2PD5ulLl4Db751P4NyCapDq9S6sOZX6yCvOm34veOU6XxgTO-Z-Mcc_9EDsY9N29JzEga40mIjyniK47EI1uKC0Y-1CdyyDFajaS9fXNXlI4NJlXiYFuKpn0M2qAdLJ8rwkTV7-Ud-P3o_SMlpw4nJCE4XpD0V3bUyYIa2sHQb-1Z5lrxH_e6cw3bvBABIW9xXYNRx2JaFfWU3ie2vbLB2Ku8Wmd8I5uk3ZaFxb9Uvra574_oA5OZKbdqygCLfA"/>
+{% else %}
+<div class="w-full h-full bg-gradient-to-br from-surface-container to-surface-container-high"></div>
+{% endif %}
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface to-transparent"></div>
+</div>
+<div class="relative z-10 p-12 max-w-3xl">
+<div class="flex items-center gap-3 mb-6">
+<span class="bg-tertiary px-3 py-1 rounded-full text-on-tertiary text-[10px] font-bold font-label uppercase tracking-widest animate-pulse">Live Broadcast</span>
+<span class="text-primary font-label text-[10px] tracking-widest uppercase">Channel 01 // Global Protocol</span>
+</div>
+{% if featured %}
+<h1 class="text-6xl font-headline font-bold text-on-surface mb-6 leading-tight tracking-tighter">
+{{ featured.title[:80] + '...' if featured.title|length > 80 else featured.title }}
+</h1>
+<p class="text-lg text-on-surface-variant font-body mb-8 max-w-xl">
+{{ featured.summary[:200] + '...' if featured.summary and featured.summary|length > 200 else (featured.summary or '') }}
+</p>
+{% else %}
+<h1 class="text-6xl font-headline font-bold text-on-surface mb-6 leading-tight tracking-tighter">
+THE SYNTHETIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">FRONTIER:</span> AI HARVEY UNVEILS QUANTUM NEWS GRID
+</h1>
+{% endif %}
+<div class="flex items-center gap-4">
+{% if featured %}
+<a href="/article/{{ featured.id }}" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed font-headline font-bold px-8 py-3 rounded-xl flex items-center gap-2 hover:brightness-110 neon-glow-primary transition-all active:scale-95">
+ENTER STREAM
+<span class="material-symbols-outlined">play_arrow</span>
+</a>
+{% else %}
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed font-headline font-bold px-8 py-3 rounded-xl flex items-center gap-2 hover:brightness-110 neon-glow-primary transition-all active:scale-95">
+ENTER STREAM
+<span class="material-symbols-outlined">play_arrow</span>
+</button>
+{% endif %}
+<button class="border border-primary/20 text-primary font-headline font-bold px-8 py-3 rounded-xl hover:bg-primary/5 transition-all">
+FULL ANALYSIS
+</button>
+</div>
+</div>
+</section>
+
+<!-- Bento Grid Categories -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+<!-- US NEWS SECTION (Wide) -->
+{% set us_articles = sections.get('sports', {}).get('articles', []) + sections.get('entertainment', {}).get('articles', [])[:2] %}
+<div class="md:col-span-8 space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant/10 pb-4">
+<h3 class="text-2xl font-headline font-bold text-on-surface flex items-center gap-3">
+<span class="w-2 h-8 bg-primary block"></span>
+DOMESTIC SECTOR <span class="text-outline/30 font-light">// US NEWS</span>
+</h3>
+<a class="text-xs font-label text-primary hover:tracking-widest transition-all" href="/mobile/">VIEW ALL REPORTS</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+{% if us_articles %}
+<!-- Main Card -->
+{% set main_us = us_articles[0] %}
+{% if main_us %}
+<div class="bg-surface-container rounded-xl overflow-hidden group border border-outline-variant/10 hover:border-primary/30 transition-all">
+<div class="aspect-video relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80" data-alt="Digital circuit lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5JOygQBpSHVx9WwpIXOYiFLI5jAzIylTEwymKDwdoRuecyYuV9HUDTf87gD20HYSr3MsldC8CYsDfm47H1UJGnPgEfRW2eh3LfDvB1XeTW72PbKdFM1Q1BMYnsSp_WUnWVN2zXsFHWbc3ongB5boshiFW8_qOfW3PYuTpa5iaI_Qya29SY1ntniwshMi0e2B2TCeaQYmmV83JVZOIxripaB7FtbAdhawa7aUTC0KMPyGgeRQNnR_fEZ6iFWz4MWD9BrOq1tXFBw"/>
+<div class="absolute top-4 left-4">
+<span class="bg-surface-container-highest/80 backdrop-blur-md text-primary text-[10px] px-2 py-1 rounded-lg font-label border border-primary/20">NEWS</span>
+</div>
+</div>
+<div class="p-6">
+<h4 class="text-xl font-headline font-bold text-on-surface mb-3 group-hover:text-primary transition-colors line-clamp-2">
+<a href="/article/{{ main_us.id }}">{{ main_us.title }}</a>
+</h4>
+{% if main_us.summary %}
+<p class="text-sm text-on-surface-variant font-body line-clamp-2 mb-4">{{ main_us.summary }}</p>
+{% endif %}
+<div class="flex justify-between items-center text-[10px] font-label text-outline uppercase tracking-wider">
+<span>{{ main_us.source }}</span>
+<span>Source Verified</span>
+</div>
+</div>
+</div>
+{% endif %}
+<!-- Secondary Cards Column -->
+<div class="space-y-6">
+{% for article in us_articles[1:3] %}
+<div class="flex gap-4 group cursor-pointer">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border border-outline-variant/10">
+<img class="w-full h-full object-cover group-hover:rotate-3 transition-transform" data-alt="News thumbnail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXnc-y6pAwyJXW8cM7ObsjAs4gAhaZKj773Ac_bl8rEkB2z1DhzCf03aPMt7CfIumYTcfseJNPbIPETrBgQEy_qH95pgdn--ouFyWCbxtCNMdnkgwBtlwL_OPiUqAbMXB7UYR8OLBRLUFnDzpprtDVIs5QumX3pl7BwJ3BZic3AznaB443BE19e-OA4nRzgkCzMbblx3OOt5aCZnBmkvPbrWL37VICHuCJq23iV0U0AEfst7tVt8QYZH7ln3uNRYkbmPipQ9rcXw"/>
+</div>
+<div class="flex-1">
+<span class="text-secondary text-[10px] font-label font-bold uppercase tracking-widest">Update</span>
+<h5 class="text-on-surface font-headline font-semibold group-hover:text-secondary transition-colors leading-tight line-clamp-2">
+<a href="/article/{{ article.id }}">{{ article.title }}</a>
+</h5>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-[9px] font-label text-outline uppercase tracking-tighter">Verified Stream</span>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<!-- Empty state -->
+<div class="col-span-2 text-center py-12 text-outline">
+<p class="font-headline">No articles yet. Run <code>python main.py scrape</code> to fetch news.</p>
+</div>
+{% endif %}
+</div>
+</div>
+
+<!-- FINANCE / SIDEBAR (Narrow) -->
+{% set finance_articles = sections.get('tech', {}).get('articles', [])[:3] %}
+<div class="md:col-span-4 space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant/10 pb-4">
+<h3 class="text-2xl font-headline font-bold text-on-surface flex items-center gap-3">
+MARKET PULSE
+</h3>
+<span class="material-symbols-outlined text-secondary">query_stats</span>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/5">
+<div class="space-y-6">
+<!-- Ticker Items -->
+<div class="flex justify-between items-center p-3 bg-surface-container rounded-lg border-l-2 border-tertiary">
+<div>
+<p class="text-xs font-label text-outline uppercase">NEON_ETH</p>
+<p class="text-lg font-headline font-bold text-on-surface">$4,821.40</p>
+</div>
+<div class="text-right">
+<p class="text-tertiary text-xs font-bold">+12.4%</p>
+<p class="text-[10px] text-outline font-label uppercase">VOL: 2.1B</p>
+</div>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container rounded-lg border-l-2 border-secondary">
+<div>
+<p class="text-xs font-label text-outline uppercase">AI_HARV</p>
+<p class="text-lg font-headline font-bold text-on-surface">$128.92</p>
+</div>
+<div class="text-right">
+<p class="text-secondary text-xs font-bold">-2.1%</p>
+<p class="text-[10px] text-outline font-label uppercase">VOL: 450M</p>
+</div>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container rounded-lg border-l-2 border-primary">
+<div>
+<p class="text-xs font-label text-outline uppercase">QUANT_SYS</p>
+<p class="text-lg font-headline font-bold text-on-surface">$0.45</p>
+</div>
+<div class="text-right">
+<p class="text-primary text-xs font-bold">+0.8%</p>
+<p class="text-[10px] text-outline font-label uppercase">VOL: 14.2B</p>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/10">
+<h4 class="text-xs font-label text-outline uppercase tracking-widest mb-4">Trending Sentiment</h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary border border-tertiary/20 rounded-full text-[10px] font-bold">BULLISH: AI CHIPS</span>
+<span class="px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-[10px] font-bold">VOLATILE: ENERGY</span>
+<span class="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[10px] font-bold">NEUTRAL: HARDWARE</span>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-secondary/20 to-primary/20 p-6 rounded-xl border border-white/5 relative overflow-hidden group">
+<div class="relative z-10">
+<h4 class="text-xl font-headline font-bold text-on-surface mb-2">Harvey Intelligence Report</h4>
+{% if featured and featured.summary %}
+<p class="text-xs text-on-surface-variant font-body mb-4 leading-relaxed">{{ featured.summary[:150] }}...</p>
+{% else %}
+<p class="text-xs text-on-surface-variant font-body mb-4 leading-relaxed">Predictive models suggest a 89% probability of major tech sector rally within 48 hours.</p>
+{% endif %}
+<button class="w-full py-2 bg-on-surface text-surface text-[10px] font-headline font-black uppercase tracking-widest rounded-lg hover:bg-primary transition-all">Download Full PDF</button>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-white/5 group-hover:rotate-12 transition-transform">insights</span>
+</div>
+</div>
+</div>
+
+<!-- WORLD NEWS SECTION -->
+{% set world_articles = sections.get('global', {}).get('articles', [])[:4] %}
+<section class="mt-16">
+<div class="flex items-center gap-4 mb-8">
+<h3 class="text-3xl font-headline font-bold text-on-surface">GLOBAL COORDINATES</h3>
+<div class="flex-1 h-[1px] bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+{% for article in world_articles %}
+<!-- Grid Card -->
+<div class="md:col-span-1 bg-surface-container rounded-xl p-1 group border border-outline-variant/5">
+<div class="h-48 rounded-lg overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform" data-alt="Global news" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLAg-aDmjd2VVoY40tHmV5xEOCt0MwT9M9GQ5X_ypCVC5Bws0I8azOabgjcj9XOQvnHtk2PmwfjK3BGptiezKloLxmwtl3sl93W9bwUuBnmotxEA8eSc9Hklzo9CLwtZNVW0Mi_1XMOj5Hftjdhe-iHD38sqQJjQhT0ebh5Lr9dcy1w7pIRB9Xm81krgaaLumXv3oVDUn_yyuiWVIH22WQKFnLEyJ71LVo2GZJitHcZ7ba2CpvVjSAfK548MT7JMuSuxwGB48ltA"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-overlay"></div>
+</div>
+<div class="p-4">
+<span class="text-[9px] font-label text-primary font-bold tracking-widest uppercase">Analysis</span>
+<h4 class="text-on-surface font-headline font-bold mt-2 leading-snug group-hover:text-primary transition-colors line-clamp-2">
+<a href="/article/{{ article.id }}">{{ article.title }}</a>
+</h4>
+</div>
+</div>
+{% else %}
+{% for i in range(4) %}
+<div class="md:col-span-1 bg-surface-container rounded-xl p-1 group border border-outline-variant/5">
+<div class="h-48 rounded-lg overflow-hidden relative bg-surface-container-high"></div>
+<div class="p-4">
+<span class="text-[9px] font-label text-outline font-bold tracking-widest uppercase">Loading</span>
+<h4 class="text-on-surface font-headline font-bold mt-2 leading-snug text-outline">Awaiting feed data...</h4>
+</div>
+</div>
+{% endfor %}
+{% endfor %}
+</div>
+</section>
+
+</main>
+
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-tr from-primary to-primary-container text-on-primary-fixed rounded-full shadow-[0_8px_32px_rgba(172,199,255,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+
+<!-- Background Decor -->
+<div class="fixed top-0 right-0 w-full h-full pointer-events-none -z-20 opacity-20">
+<div class="absolute inset-0 bg-[radial-gradient(#414754_1px,transparent_1px)] [background-size:40px_40px]"></div>
+</div>
+{% endblock %}

@@ -119,3 +119,329 @@ data/
 - Model: `Qwen/Qwen3-TTS-12Hz-1.7B-Base` with `x_vector_only_mode` voice cloning
 - Each article takes ~5-10 minutes to generate (LLM rewrite + TTS inference on GPU)
 - Audio files are cached — regeneration only happens for new articles or with `force=True`
+
+---
+
+## Web UI: Neon Pulse Design System
+
+The app includes a modern mobile and desktop UI with a "Neon Pulse" cyberpunk design.
+
+### Design Features
+
+- Dark cyberpunk theme (#0f1419 background)
+- Glass morphism panels with backdrop blur
+- Neon blue (#acc7ff) and purple (#6f00be) accents
+- Custom fonts: Space Grotesk + Inter
+- Fully responsive - mobile-first with bottom nav, desktop with side nav
+
+### Available Routes
+
+| Route | Description |
+|-------|-------------|
+| `/` | Desktop home |
+| `/home/` | Desktop home (full news feed) |
+| `/mobile/` | Mobile home (bottom navigation) |
+| `/category/ai/` | Mobile AI category page |
+| `/category/world/` | Mobile World category page |
+| `/desktop/category/ai/` | Desktop AI category |
+| `/desktop/category/world/` | Desktop World category |
+| `/brain/` | Desktop "The Brain" about page |
+| `/mobile/brain/` | Mobile about page |
+
+### Template Structure
+
+```
+templates/
+├── base.html              # Shared Neon Pulse design system (Tailwind config, styles)
+├── desktop/
+│   ├── index.html         # Home feed with viral hero, bento grid
+│   ├── ai.html            # AI category with featured story
+│   ├── world.html         # World news
+│   └── brain.html         # About page (neural pipeline explanation)
+└── mobile/
+    ├── index.html         # Home with hero, category sections
+    ├── ai.html            # AI category
+    ├── world.html         # World news
+    └── brain.html         # About page
+```
+
+---
+
+## Deployment to IONOS Cloud Server
+
+### Prerequisites
+
+- IONOS Cloud Server (Ubuntu) with SSH access
+- Domain pointed to server IP
+
+### Step 1: Connect to Server
+
+```bash
+ssh root@YOUR_SERVER_IP
+```
+
+### Step 2: Install Dependencies
+
+```bash
+# Update and install Python
+apt update && apt install -y python3 python3-pip python3-venv git nginx
+
+# Clone the repository
+cd /opt
+git clone https://github.com/ssinjinx/ai-harvey-news.git
+cd ai-harvey-news
+
+# Set up virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 3: Scrape News (Optional)
+
+```bash
+python main.py scrape --llm
+python main.py fetch-content
+```
+
+### Step 4: Run the Server (Development)
+
+```bash
+source venv/bin/activate
+python -m src.server
+```
+
+### Step 5: Production Deployment with Gunicorn
+
+```bash
+pip install gunicorn
+gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
+```
+
+### Step 6: Set Up Nginx Reverse Proxy
+
+```bash
+# Create nginx config (replace yourdomain.com)
+cat > /etc/nginx/sites-available/harvey << 'EOF'
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:9090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
+
+# Enable the site
+ln -s /etc/nginx/sites-available/harvey /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+```
+
+### Step 7: Set Up SSL (Let's Encrypt)
+
+```bash
+apt install -y certbot python3-certbot-nginx
+certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+### Step 8: Keep Server Running with Systemd
+
+```bash
+cat > /etc/systemd/system/harvey.service << 'EOF'
+[Unit]
+Description=Harvey AI News
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/ai-harvey-news
+ExecStart=/opt/ai-harvey-news/venv/bin/gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable harvey
+systemctl start harvey
+```
+
+### Troubleshooting
+
+- Check server status: `systemctl status harvey`
+- View logs: `journalctl -u harvey -f`
+- Restart: `systemctl restart harvey`
+
+---
+
+## Last Updated
+
+2026-03-19 - Added Neon Pulse UI with mobile and desktop templates
+
+---
+
+## Web UI: Neon Pulse Design System
+
+The app includes a modern mobile and desktop UI with a "Neon Pulse" cyberpunk design.
+
+### Design Features
+
+- Dark cyberpunk theme (#0f1419 background)
+- Glass morphism panels with backdrop blur
+- Neon blue (#acc7ff) and purple (#6f00be) accents
+- Custom fonts: Space Grotesk + Inter
+- Fully responsive - mobile-first with bottom nav, desktop with side nav
+
+### Available Routes
+
+| Route | Description |
+|-------|-------------|
+| `/` | Desktop home |
+| `/home/` | Desktop home (full news feed) |
+| `/mobile/` | Mobile home (bottom navigation) |
+| `/category/ai/` | Mobile AI category page |
+| `/category/world/` | Mobile World category page |
+| `/desktop/category/ai/` | Desktop AI category |
+| `/desktop/category/world/` | Desktop World category |
+| `/brain/` | Desktop "The Brain" about page |
+| `/mobile/brain/` | Mobile about page |
+
+### Template Structure
+
+```
+templates/
+├── base.html              # Shared Neon Pulse design system (Tailwind config, styles)
+├── desktop/
+│   ├── index.html         # Home feed with viral hero, bento grid
+│   ├── ai.html            # AI category with featured story
+│   ├── world.html         # World news
+│   └── brain.html         # About page (neural pipeline explanation)
+└── mobile/
+    ├── index.html         # Home with hero, category sections
+    ├── ai.html            # AI category
+    ├── world.html         # World news
+    └── brain.html         # About page
+```
+
+---
+
+## Deployment to IONOS Cloud Server
+
+### Prerequisites
+
+- IONOS Cloud Server (Ubuntu) with SSH access
+- Domain pointed to server IP
+
+### Step 1: Connect to Server
+
+```bash
+ssh root@YOUR_SERVER_IP
+```
+
+### Step 2: Install Dependencies
+
+```bash
+# Update and install Python
+apt update && apt install -y python3 python3-pip python3-venv git nginx
+
+# Clone the repository
+cd /opt
+git clone https://github.com/ssinjinx/ai-harvey-news.git
+cd ai-harvey-news
+
+# Set up virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 3: Scrape News (Optional)
+
+```bash
+python main.py scrape --llm
+python main.py fetch-content
+```
+
+### Step 4: Run the Server (Development)
+
+```bash
+source venv/bin/activate
+python -m src.server
+```
+
+### Step 5: Production Deployment with Gunicorn
+
+```bash
+pip install gunicorn
+gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
+```
+
+### Step 6: Set Up Nginx Reverse Proxy
+
+```bash
+# Create nginx config (replace yourdomain.com)
+cat > /etc/nginx/sites-available/harvey << 'EOF'
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:9090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
+
+# Enable the site
+ln -s /etc/nginx/sites-available/harvey /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+```
+
+### Step 7: Set Up SSL (Let's Encrypt)
+
+```bash
+apt install -y certbot python3-certbot-nginx
+certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+### Step 8: Keep Server Running with Systemd
+
+```bash
+cat > /etc/systemd/system/harvey.service << 'EOF'
+[Unit]
+Description=Harvey AI News
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/ai-harvey-news
+ExecStart=/opt/ai-harvey-news/venv/bin/gunicorn -w 4 -b 127.0.0.1:9090 src.server:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable harvey
+systemctl start harvey
+```
+
+### Troubleshooting
+
+- Check server status: `systemctl status harvey`
+- View logs: `journalctl -u harvey -f`
+- Restart: `systemctl restart harvey`
+
+---
+
+## Last Updated
+
+2026-03-19 - Added Neon Pulse UI with mobile and desktop templates
