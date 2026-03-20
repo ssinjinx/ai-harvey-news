@@ -93,7 +93,7 @@ def fetch_content() -> None:
     logger.info("Done. %d articles updated with full content.", updated)
 
 
-def generate_audio() -> None:
+def generate_audio(limit: int = None) -> None:
     """Generate audio for articles that don't have it cached."""
     from src.database import get_articles_with_content, get_article_by_id
     from src.tts import generate_speech_for_article, is_available, get_audio_for_article
@@ -105,6 +105,11 @@ def generate_audio() -> None:
     # Get articles with content but no audio
     articles = get_articles_with_content()
     to_generate = [a for a in articles if get_audio_for_article(a["id"]) is None]
+
+    # Limit to top N if specified
+    if limit:
+        to_generate = to_generate[:limit]
+        logger.info("Limited to top %d articles", limit)
 
     logger.info("Generating audio for %d articles...", len(to_generate))
     generated = 0
@@ -145,6 +150,13 @@ def main() -> None:
     cmd = args[0] if args else "all"
     flags = set(args[1:])
 
+    # Parse --limit N for generate-audio
+    limit = None
+    if "--limit" in args:
+        idx = args.index("--limit")
+        if idx + 1 < len(args):
+            limit = int(args[idx + 1])
+
     if cmd == "scrape":
         scrape(use_llm="--llm" in flags)
     elif cmd == "summarize":
@@ -152,7 +164,10 @@ def main() -> None:
     elif cmd == "fetch-content":
         fetch_content()
     elif cmd == "generate-audio":
-        generate_audio()
+        if limit:
+            generate_audio(limit=limit)
+        else:
+            generate_audio()
     elif cmd == "serve":
         serve()
     elif cmd in ("all", ""):
