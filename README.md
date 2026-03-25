@@ -288,34 +288,41 @@ templates/
 |---|---|
 | **Live URL** | https://ai-harvey-news.siliconsoul.cloud |
 | **Server IP** | 162.222.206.135 |
-| **SSH user** | root |
-| **App path** | /opt/ai-harvey-news |
-| **Process** | gunicorn (no systemd — see below) |
+| **SSH user** | `root` |
+| **SSH password** | `gcD0RCEE4MNNqn` |
+| **OS** | Ubuntu 24.04 |
+| **Specs** | 4 vCore, 8 GB RAM, 240 GB NVMe |
+| **App path** | `/opt/ai-harvey-news` |
+| **Process** | gunicorn (no systemd — manual restart) |
+| **Panel** | Plesk (https://162.222.206.135:8443) |
+| **Hosted at** | IONOS Cloud, US datacenter |
 
-> **Note:** The domain is behind Cloudflare. SSH must go directly to the IP, not the domain.
-> IONOS firewall may restrict SSH to specific source IPs — if you get a timeout, whitelist your IP in the IONOS Cloud console under **Networking → Firewall**.
+> **IMPORTANT — Cloudflare proxy:** The domain points to Cloudflare IPs, not the server directly.
+> Always SSH to the **IP** (`162.222.206.135`), never the domain.
 
-### deploy.sh
+> **IMPORTANT — IONOS Firewall:** The server has a firewall policy ("My firewall policy") that blocks
+> all inbound traffic by default. If SSH times out, you must add an inbound rule for **TCP port 22**
+> (or all ports) in the IONOS Cloud console:
+> **Cloud Console → Server → Networking → Firewall → Edit policy → Add rule → TCP / Port 22 / Any source**
 
-There is a `deploy.sh` at the repo root (also at `/home/ssinjin/projects/ai-harvey-news/deploy.sh` on the dev machine) that handles everything automatically:
-
-```bash
-bash deploy.sh
-```
-
-It uses `sshpass` to connect, pulls the latest code, and restarts gunicorn.
-
-### Manual Deploy (after first setup)
+### Quick Deploy (one command)
 
 ```bash
 sshpass -p "gcD0RCEE4MNNqn" ssh -o StrictHostKeyChecking=no root@162.222.206.135 \
   "cd /opt/ai-harvey-news && git pull origin master && pkill -f gunicorn; gunicorn -w 4 -b 127.0.0.1:9090 src.server:app --daemon"
 ```
 
+Or just run the included script:
+
+```bash
+bash deploy.sh
+```
+
 ### Step 1: Connect to Server
 
 ```bash
 ssh root@162.222.206.135
+# password: gcD0RCEE4MNNqn
 ```
 
 ### Step 2: Install Dependencies
