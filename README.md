@@ -282,15 +282,40 @@ templates/
 
 ## Deployment to IONOS Cloud Server
 
-### Prerequisites
+### Server Details
 
-- IONOS Cloud Server (Ubuntu) with SSH access
-- Domain pointed to server IP
+| | |
+|---|---|
+| **Live URL** | https://ai-harvey-news.siliconsoul.cloud |
+| **Server IP** | 162.222.206.135 |
+| **SSH user** | root |
+| **App path** | /opt/ai-harvey-news |
+| **Process** | gunicorn (no systemd — see below) |
+
+> **Note:** The domain is behind Cloudflare. SSH must go directly to the IP, not the domain.
+> IONOS firewall may restrict SSH to specific source IPs — if you get a timeout, whitelist your IP in the IONOS Cloud console under **Networking → Firewall**.
+
+### deploy.sh
+
+There is a `deploy.sh` at the repo root (also at `/home/ssinjin/projects/ai-harvey-news/deploy.sh` on the dev machine) that handles everything automatically:
+
+```bash
+bash deploy.sh
+```
+
+It uses `sshpass` to connect, pulls the latest code, and restarts gunicorn.
+
+### Manual Deploy (after first setup)
+
+```bash
+sshpass -p "gcD0RCEE4MNNqn" ssh -o StrictHostKeyChecking=no root@162.222.206.135 \
+  "cd /opt/ai-harvey-news && git pull origin master && pkill -f gunicorn; gunicorn -w 4 -b 127.0.0.1:9090 src.server:app --daemon"
+```
 
 ### Step 1: Connect to Server
 
 ```bash
-ssh root@YOUR_SERVER_IP
+ssh root@162.222.206.135
 ```
 
 ### Step 2: Install Dependencies
