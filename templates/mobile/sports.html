@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}HARVEY AI | World News{% endblock %}
+{% block title %}HARVEY AI | {{ label }}{% endblock %}
 {% block body %}
 <!-- TopAppBar -->
 <nav class="fixed top-0 w-full z-50 bg-[#0f1419]/70 backdrop-blur-xl border-b border-[#414754]/15 shadow-[0_8_32px_rgba(0,0,0,0.4)] flex justify-between items-center px-6 h-16">
@@ -17,18 +17,20 @@
 <img alt="AI Assistant Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4rScFlRF0HRMjZHny_ySpgpJi6zRqxBxoYY_Jz10pKhMlL3oDPZejgd6y2KzOTGyn_314Cu-0BYhrzT_VAorj-wh8pe4CJng2T766cY5zu_ru2n_uBinbrdGBovsKdZTDjz3J3broYgYBs6R9F7dslm3DhCTEttJZf8UMvslnS18_S1P8_5RoWrFZkE4OLFolRNyhun_hVWNIppjl6LM3wP27ri7kVnheA2Ol9acIZxh8DpEvBEBF3CjvBkhzFP9Zr0RH7ZfHbw"/>
 </div>
 </nav>
+{% set active_tab = 'sports' %}
+{% include 'mobile/_tabs.html' %}
 
-<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto">
+<main class="pt-32 pb-32 px-4 md:px-8 max-w-7xl mx-auto">
 <!-- Category Header -->
 <header class="mb-12 flex items-center gap-4">
 <div class="bg-surface-container-highest p-3 rounded-xl border border-outline-variant/15 neon-glow-primary">
 <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">public</span>
 </div>
 <div>
-<h1 class="font-headline text-4xl font-bold tracking-tight text-on-surface uppercase italic">WORLD NEWS</h1>
+<h1 class="font-headline text-4xl font-bold tracking-tight text-on-surface uppercase italic">{{ label }}</h1>
 <div class="flex items-center gap-2 mt-1">
 <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
-<span class="font-label text-[10px] tracking-[0.2em] text-outline uppercase">Global Intelligence Stream</span>
+<span class="font-label text-[10px] tracking-[0.2em] text-outline uppercase">{{ label }} Stream</span>
 </div>
 </div>
 </header>
@@ -140,7 +142,7 @@ Harvey's Analysis
 </div>
 {% else %}
 <div class="text-center py-12 text-outline">
-<p class="font-headline">No world news yet. Run <code>python main.py scrape</code> to fetch news.</p>
+<p class="font-headline">No {{ label }} yet. Run <code>python main.py scrape</code> to fetch news.</p>
 </div>
 {% endfor %}
 </section>
@@ -157,12 +159,12 @@ Synchronize More Data
 
 <!-- BottomNavBar -->
 <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-4 pb-safe bg-[#1b2026]/70 backdrop-blur-20px z-50 rounded-t-xl border-t border-[#414754]/15 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] md:hidden">
-<button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors" onclick="window.location.href='/mobile/'">
+<button class="flex flex-col items-center justify-center text-[#acc7ff] bg-[#acc7ff]/10 rounded-xl px-4 py-1 border-b-2 border-[#acc7ff]" onclick="window.location.href='/mobile/'">
 <span class="material-symbols-outlined mb-1">sensors</span>
 <span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Stream</span>
 </button>
-<button class="flex flex-col items-center justify-center text-[#acc7ff] bg-[#acc7ff]/10 rounded-xl px-4 py-1 border-b-2 border-[#acc7ff]">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+<button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors">
+<span class="material-symbols-outlined mb-1">electric_bolt</span>
 <span class="font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase">Pulse</span>
 </button>
 <button class="flex flex-col items-center justify-center text-[#414754] px-4 py-1 hover:text-[#ddb7ff] transition-colors">

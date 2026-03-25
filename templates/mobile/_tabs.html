@@ -1,0 +1,24 @@
+<!-- Category Tabs - horizontally scrollable -->
+<nav class="fixed top-16 w-full z-40 bg-[#0f1419]/95 backdrop-blur-xl border-b border-[#414754]/20 overflow-x-auto scrollbar-none" style="-ms-overflow-style:none;scrollbar-width:none;">
+<div class="flex gap-2 px-4 py-2.5 min-w-max">
+  {% set tabs = [
+    ('all',           'All',           '/mobile/',                  'sensors'),
+    ('global',        'World',         '/category/global/',         'public'),
+    ('ai',            'AI',            '/category/ai/',             'neurology'),
+    ('tech',          'Tech',          '/category/tech/',           'code'),
+    ('sports',        'Sports',        '/category/sports/',         'sports_soccer'),
+    ('entertainment', 'Entertainment', '/category/entertainment/',  'movie')
+  ] %}
+  {% for key, name, url, icon in tabs %}
+  {% if active_tab == key %}
+  <a href="{{ url }}" class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-['Space_Grotesk'] font-bold uppercase tracking-wider bg-[#acc7ff]/20 text-[#acc7ff] border border-[#acc7ff]/40 whitespace-nowrap">
+    <span class="material-symbols-outlined text-sm" style="font-size:14px;">{{ icon }}</span>{{ name }}
+  </a>
+  {% else %}
+  <a href="{{ url }}" class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-['Space_Grotesk'] uppercase tracking-wider text-[#5a6478] hover:text-[#acc7ff] hover:bg-[#acc7ff]/10 transition-colors whitespace-nowrap">
+    <span class="material-symbols-outlined text-sm" style="font-size:14px;">{{ icon }}</span>{{ name }}
+  </a>
+  {% endif %}
+  {% endfor %}
+</div>
+</nav>
