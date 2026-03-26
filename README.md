@@ -388,6 +388,79 @@ systemctl start harvey
 
 ---
 
+## Daily Workflow: Updating the Site
+
+The site runs locally on your Mac and is accessible via Cloudflare Tunnel. To update news each day:
+
+```bash
+# 1. Navigate to the project
+cd ~/ai-harvey-news
+
+# 2. Activate the environment
+conda activate voice-tts
+
+# 3. Scrape fresh articles (this runs automatically when you start the app)
+python main.py scrape
+```
+
+**That's it!** The articles will immediately appear on https://ai-harvey-news.siliconsoul.cloud because:
+- The tunnel (`cloudflared`) on your Mac connects to `localhost:9090`
+- The Flask app serves the articles from the local SQLite DB
+
+### Starting the App (if not running)
+
+```bash
+cd ~/ai-harvey-news
+conda activate voice-tts
+python main.py serve
+```
+
+The app will be available at:
+- Local: http://localhost:9090
+- Live: https://ai-harvey-news.siliconsoul.cloud
+
+### Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| Site shows no articles | Run `python main.py scrape` to fetch news |
+| "DB not initialized" error | Run `python -c "from src.database import init_db; init_db()"` |
+| Tunnel not connecting | Make sure cloudflared is running: `ps aux \| grep cloudflared` |
+| 521 error | Cloudflare can't reach your Mac - check firewall/internet |
+
+### Automated Daily Updates (Cron)
+
+To auto-scrape every morning at 6 AM:
+
+```bash
+crontab -e
+```
+
+Add this line:
+
+```
+0 6 * * * cd ~/ai-harvey-news && conda run -n voice-tts python main.py scrape >> ~/harvey-cron.log 2>&1
+```
+
+Or if not using conda:
+
+```
+0 6 * * * cd ~/ai-harvey-news && python3 main.py scrape >> ~/harvey-cron.log 2>&1
+```
+
+### Manual Restart (if needed)
+
+If the server isn't running:
+
+```bash
+# Start the Flask server (runs in background)
+cd ~/ai-harvey-news
+conda activate voice-tts
+python main.py serve &
+```
+
+---
+
 ## Last Updated
 
-2026-03-19 - Added InfiniteTalk video generation (ComfyUI talking-head widget, 240×416 portrait)
+2026-03-25 - Added daily workflow section for site updates
