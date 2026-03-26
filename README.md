@@ -430,7 +430,7 @@ The app will be available at:
 
 ### Automated Daily Updates (Cron)
 
-To auto-scrape every morning at 6 AM:
+To auto-update every morning at 6 AM (full pipeline):
 
 ```bash
 crontab -e
@@ -439,13 +439,24 @@ crontab -e
 Add this line:
 
 ```
-0 6 * * * cd ~/ai-harvey-news && conda run -n voice-tts python main.py scrape >> ~/harvey-cron.log 2>&1
+0 6 * * * cd ~/ai-harvey-news && python3 main.py scrape && python3 main.py fetch-content && python3 main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
 ```
 
-Or if not using conda:
+This runs:
+1. `scrape` - fetch articles from RSS feeds
+2. `fetch-content` - get full article text from source URLs
+3. `generate-audio --limit 5` - generate Paul Harvey audio for top 5 stories
 
+**Note:** Requires environment variables for external drive:
 ```
-0 6 * * * cd ~/ai-harvey-news && python3 main.py scrape >> ~/harvey-cron.log 2>&1
+0 6 * * * cd ~/ai-harvey-news && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py scrape >> ~/harvey-cron.log 2>&1 && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py fetch-content >> ~/harvey-cron.log 2>&1 && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
+```
+
+**Important:** Change `HARVEY_DATA_DIR` path to match your external drive.
+
+**If using conda:**
+```
+0 6 * * * cd ~/ai-harvey-news && conda run -n voice-tts python main.py scrape && conda run -n voice-tts python main.py fetch-content && conda run -n voice-tts python main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
 ```
 
 ### Manual Restart (if needed)
@@ -463,4 +474,4 @@ python main.py serve &
 
 ## Last Updated
 
-2026-03-25 - Added daily workflow section for site updates
+2026-03-26 - Full nightly cron pipeline (scrape → fetch-content → generate-audio --limit 5)
