@@ -7,16 +7,17 @@ News scraper that rewrites articles in Paul Harvey's storytelling style and read
 1. **Scrape** — Pulls articles from RSS feeds across 5 categories (Global, Tech, Sports, Entertainment, AI)
 2. **Fetch Content** — Scrapes full article text from each source URL
 3. **LLM Rewrite** — Sends article text to Ollama, which rewrites it as Paul Harvey ("Page 2...", dramatic pauses, "And now you know... the rest of the story.")
-4. **Voice Clone TTS** — Qwen3-TTS (1.7B Base model) clones Harvey's voice from a 13-second reference clip and synthesizes the rewritten script
+4. **Voice Clone TTS** — ComfyUI runs Qwen3-TTS (1.7B) with a 5-second reference clip to clone Harvey's voice and synthesize the rewritten script
 5. **Serve** — Flask web UI at `localhost:9090` with a "Listen" button on each article that plays the generated audio
 
 ## Requirements
 
-- **GPU**: AMD Radeon RX 7900 XTX (24GB VRAM) with ROCm
-- **Python**: 3.12 via conda (`voice-tts` env)
+- **ComfyUI**: Running locally at `http://localhost:8188` with the `FB_Qwen3TTSVoiceClone` custom node installed
+- **GPU**: NVIDIA (tested on RTX 5060 Ti 16GB) or AMD RX 7900 XTX (24GB) with ROCm
+- **Python**: 3.12 via venv
 - **Ollama**: Running locally with a model pulled (default: `minimax-m2.5:cloud`)
-- **Reference audio**: Paul Harvey `.wav` clip (default: `~/Music/harveyclip.wav`)
-- **External storage**: DB and audio cache are stored outside the repo (default: `/media/ssinjin/.../harvey-news/data/`)
+- **Reference audio**: 5-second Paul Harvey `.wav` clip in ComfyUI's input directory (`harveyclip_5s.wav`)
+- **ffmpeg**: For MP3 → WAV conversion after ComfyUI generates audio
 
 ## Setup
 
@@ -25,14 +26,21 @@ News scraper that rewrites articles in Paul Harvey's storytelling style and read
 git clone https://github.com/ssinjinx/ai-harvey-news.git
 cd ai-harvey-news
 
-# 2. Use the voice-tts conda env (has ROCm PyTorch + qwen-tts + deps)
-conda activate voice-tts
+# 2. Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-# 3. Install additional dependencies
-pip install feedparser flask requests beautifulsoup4
+# 3. Install dependencies
+pip install -r requirements.txt
 
-# 4. Make sure Ollama is running
+# 4. Install audio conversion (required for MP3 → WAV)
+# Ubuntu/Debian: apt install ffmpeg
+
+# 5. Make sure Ollama is running
 ollama serve
+
+# 6. Make sure ComfyUI is running with the Qwen3-TTS node
+# See the ComfyUI Setup section below
 ```
 
 ### Environment Variables (all optional)
@@ -40,14 +48,16 @@ ollama serve
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `HARVEY_DATA_DIR` | `/media/ssinjin/.../harvey-news/data` | Where to store the SQLite DB and audio cache |
-| `HARVEY_CLONE_AUDIO` | `~/Music/harveyclip.wav` | Path to Paul Harvey reference audio for voice cloning |
+| `HARVEY_CLONE_AUDIO` | `~/Music/harveyclip.wav` | Path to Paul Harvey reference audio (copied to ComfyUI automatically) |
+| `COMFYUI_URL` | `http://localhost:8188` | ComfyUI server URL |
+| `COMFYUI_DIR` | `/media/ssinjin/.../ComfyUI` | ComfyUI installation directory (for finding output files) |
 | `OLLAMA_MODEL` | `minimax-m2.5:cloud` | Ollama model used for the Paul Harvey rewrite |
 | `PORT` | `9090` | Web server port |
 
 ## Usage
 
 ```bash
-conda activate voice-tts
+source venv/bin/activate
 
 # Full pipeline: scrape → serve
 python main.py
@@ -61,12 +71,28 @@ python main.py serve               # Start web server at localhost:9090
 python main.py summarize           # Re-summarize existing articles via Ollama
 ```
 
+### Standalone TTS script
+
+```bash
+# Use the default script file
+python generate_harvey_tts.py
+
+# Use a custom script file
+python generate_harvey_tts.py my_script.txt
+
+# Use inline text
+python generate_harvey_tts.py --text "Good day, everyone. This is Harvey."
+
+# Custom output path
+python generate_harvey_tts.py --output /path/to/output.wav
+```
+
 ### Typical workflow
 
 ```bash
 python main.py scrape --llm        # Get new articles with summaries
 python main.py fetch-content       # Get full article text
-python main.py generate-audio      # Generate Paul Harvey audio for each article (~5-10 min per article)
+python main.py generate-audio      # Generate Paul Harvey audio via ComfyUI (~2-3 min per article)
 python main.py serve               # Open http://localhost:9090 to browse and listen
 ```
 
@@ -75,22 +101,20 @@ python main.py serve               # Open http://localhost:9090 to browse and li
 ```
 ai-harvey-news/
 ├── main.py                  # CLI entry point (scrape, fetch, generate, serve)
+├── generate_harvey_tts.py  # Standalone TTS script (uses ComfyUI API)
 ├── src/
-│   ├── config.py            # Feeds, DB path, audio cache path, Ollama config
+│   ├── config.py            # Feeds, DB path, audio cache path, Ollama/ComfyUI config
 │   ├── scraper.py           # RSS feed parsing + full article content scraping
 │   ├── database.py          # SQLite operations (articles table)
 │   ├── llm.py               # Ollama LLM summarization
-│   ├── tts.py               # Paul Harvey TTS pipeline (LLM rewrite + Qwen3-TTS voice clone)
+│   ├── tts.py               # Paul Harvey TTS pipeline (Ollama rewrite → ComfyUI voice clone)
 │   └── server.py            # Flask web server with audio playback
-├── templates/
-│   ├── index.html           # News listing by category
-│   └── article.html         # Article reader with audio player
 ├── comfyui/
-│   ├── workflow_api.json    # ComfyUI InfiniteTalk workflow (API format)
-│   ├── submit.py            # Script to submit video generation jobs
-│   ├── start_comfyui.sh     # Start ComfyUI with AMD ROCm env vars
-│   ├── harveycyborg.png     # Harvey reference face image
+│   ├── start_comfyui.sh     # Start ComfyUI with NVIDIA/AMD GPU env vars
+│   ├── harveycyborg.png     # Harvey reference face image (for video)
 │   └── harveyclip_5s.wav    # Harvey voice reference clip (5s)
+├── templates/               # Jinja2 HTML templates (Neon Pulse design)
+├── static/                  # Static assets (images, video)
 └── requirements.txt
 ```
 
@@ -102,10 +126,8 @@ All generated data lives in `HARVEY_DATA_DIR` (external drive by default):
 data/
 ├── news.db                        # SQLite database with all articles
 └── audio_cache/
-    ├── article_1.wav              # Generated Harvey audio
-    ├── article_1_script.txt       # Paul Harvey rewritten script (for reference)
-    ├── article_2.wav
-    ├── article_2_script.txt
+    ├── ainewsarticle_21.wav       # Generated Harvey audio
+    ├── ainewsarticle_21_script.txt  # Paul Harvey rewritten script (for reference)
     └── ...
 ```
 
@@ -121,10 +143,74 @@ data/
 
 ## Audio Details
 
-- Format: 16-bit PCM WAV, mono, 24kHz
-- Model: `Qwen/Qwen3-TTS-12Hz-1.7B-Base` with `x_vector_only_mode` voice cloning
-- Each article takes ~5-10 minutes to generate (LLM rewrite + TTS inference on GPU)
-- Audio files are cached — regeneration only happens for new articles or with `force=True`
+- **Pipeline**: Ollama (LLM rewrite) → ComfyUI Qwen3-TTS (voice clone) → ffmpeg (MP3 → WAV)
+- **Format**: 16-bit PCM WAV, mono, 24kHz
+- **Model**: Qwen3-TTS 1.7B with voice cloning via 5-second reference clip
+- **Reference audio**: `harveyclip_5s.wav` (5-second Paul Harvey clip in ComfyUI input directory)
+- **Generation time**: ~2-3 minutes per article (ComfyUI inference on RTX 5060 Ti)
+- **Audio files are cached** — regeneration only happens for new articles or with `force=True`
+
+---
+
+## ComfyUI Setup
+
+The TTS pipeline uses ComfyUI as a backend. You need ComfyUI running with the Qwen3-TTS voice clone node.
+
+### Required Custom Nodes
+
+| Node | Repository | Purpose |
+|------|-----------|---------|
+| FB_Qwen3TTSVoiceClone | [ComfyUI-Qwen-TTS](https://github.com/flybirdxx/ComfyUI-Qwen-TTS) | Voice cloning TTS |
+| easy positive | [comfyui-easy-use](https://github.com/yolain/ComfyUI-Easy-Use) | Text input helper |
+| SaveAudioMP3 | Built-in (ComfyUI ≥0.18) | MP3 output |
+
+### Required Models
+
+Place in your ComfyUI `models/` directory:
+
+| Model | Path | Notes |
+|-------|------|-------|
+| Qwen3-TTS-12Hz-1.7B-Base | `models/Qwen-TTS/` | Downloaded automatically by the node |
+
+### Input Files
+
+Ensure these files exist in ComfyUI's `input/` directory:
+
+| File | Description |
+|------|-------------|
+| `harveyclip_5s.wav` | 5-second Paul Harvey voice reference clip |
+| `harvey_ref_audio.wav` | Auto-copied from `HARVEY_CLONE_AUDIO` if missing |
+
+### Starting ComfyUI
+
+```bash
+# NVIDIA GPU
+bash ~/ai-harvey-news/comfyui/start_comfyui.sh
+
+# Or if ComfyUI is at a custom path:
+COMFYUI_DIR=/path/to/ComfyUI bash ~/ai-harvey-news/comfyui/start_comfyui.sh
+```
+
+ComfyUI will be available at `http://localhost:8188`.
+
+The script auto-detects GPU type (NVIDIA/AMD) and sets the correct environment variables:
+
+| GPU | Environment Variables |
+|-----|----------------------|
+| NVIDIA | `LD_LIBRARY_PATH` for CUDA |
+| AMD | `HSA_OVERRIDE_GFX_VERSION=11.0.0`, `PYTORCH_ALLOC_CONF`, `FLASH_ATTENTION_TRITON_AMD_ENABLE` |
+
+### Workflow
+
+The TTS pipeline submits a workflow via the ComfyUI API with these nodes:
+
+1. **easy positive** (×2) — Reference text + speech text inputs
+2. **LoadAudio** — Loads `harveyclip_5s.wav` as the voice reference
+3. **FB_Qwen3TTSVoiceClone** — Qwen3-TTS 1.7B model with voice cloning
+4. **SaveAudioMP3** — Saves generated audio as MP3
+5. **LayerUtility: PurgeVRAM V2** — Frees GPU memory after generation
+
+The workflow JSON is defined inline in `src/tts.py` — no external workflow file needed.
 
 ---
 
@@ -156,7 +242,7 @@ Place in your ComfyUI model directories:
 
 - [ComfyUI-WanVideoWrapper](https://github.com/kijai/ComfyUI-WanVideoWrapper)
 - [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
-- [ComfyUI_KJNodes](https://github.com/kijai/ComfyUI_KJNodes)
+- [ComfyUI_KJNodes](https://github.com/kijai/ComfyUI-KJNodes)
 
 ### Starting ComfyUI
 
@@ -195,7 +281,7 @@ To trim audio to a specific length (requires ffmpeg):
 ffmpeg -i full_audio.wav -t 5 -c copy harveyclip_5s.wav
 ```
 
-### Submitting a Job
+### Submitting a Video Job
 
 ```bash
 cd ~/ai-harvey-news/comfyui/
@@ -286,7 +372,7 @@ templates/
 
 | | |
 |---|---|
-| **Live URL** | https://ai-harvey-news.siliconsoul.cloud |
+| **Live URL** | https://ai-harvey-news.silconsoul.cloud |
 | **Server IP** | 162.222.206.135 |
 | **SSH user** | `root` |
 | **SSH password** | `gcD0RCEE4MNNqn` |
@@ -358,7 +444,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:9090;
         proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Real-Q-IP $remote_addr;
     }
 }
 ```
@@ -388,90 +474,6 @@ systemctl start harvey
 
 ---
 
-## Daily Workflow: Updating the Site
-
-The site runs locally on your Mac and is accessible via Cloudflare Tunnel. To update news each day:
-
-```bash
-# 1. Navigate to the project
-cd ~/ai-harvey-news
-
-# 2. Activate the environment
-conda activate voice-tts
-
-# 3. Scrape fresh articles (this runs automatically when you start the app)
-python main.py scrape
-```
-
-**That's it!** The articles will immediately appear on https://ai-harvey-news.siliconsoul.cloud because:
-- The tunnel (`cloudflared`) on your Mac connects to `localhost:9090`
-- The Flask app serves the articles from the local SQLite DB
-
-### Starting the App (if not running)
-
-```bash
-cd ~/ai-harvey-news
-conda activate voice-tts
-python main.py serve
-```
-
-The app will be available at:
-- Local: http://localhost:9090
-- Live: https://ai-harvey-news.siliconsoul.cloud
-
-### Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| Site shows no articles | Run `python main.py scrape` to fetch news |
-| "DB not initialized" error | Run `python -c "from src.database import init_db; init_db()"` |
-| Tunnel not connecting | Make sure cloudflared is running: `ps aux \| grep cloudflared` |
-| 521 error | Cloudflare can't reach your Mac - check firewall/internet |
-
-### Automated Daily Updates (Cron)
-
-To auto-update every morning at 6 AM (full pipeline):
-
-```bash
-crontab -e
-```
-
-Add this line:
-
-```
-0 6 * * * cd ~/ai-harvey-news && python3 main.py scrape && python3 main.py fetch-content && python3 main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
-```
-
-This runs:
-1. `scrape` - fetch articles from RSS feeds
-2. `fetch-content` - get full article text from source URLs
-3. `generate-audio --limit 5` - generate Paul Harvey audio for top 5 stories
-
-**Note:** Requires environment variables for external drive:
-```
-0 6 * * * cd ~/ai-harvey-news && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py scrape >> ~/harvey-cron.log 2>&1 && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py fetch-content >> ~/harvey-cron.log 2>&1 && HARVEY_DATA_DIR=/media/ssinjin/dd94215e-9604-48fe-ab07-6f002b2281b0/harvey-news/data python3 main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
-```
-
-**Important:** Change `HARVEY_DATA_DIR` path to match your external drive.
-
-**If using conda:**
-```
-0 6 * * * cd ~/ai-harvey-news && conda run -n voice-tts python main.py scrape && conda run -n voice-tts python main.py fetch-content && conda run -n voice-tts python main.py generate-audio --limit 5 >> ~/harvey-cron.log 2>&1
-```
-
-### Manual Restart (if needed)
-
-If the server isn't running:
-
-```bash
-# Start the Flask server (runs in background)
-cd ~/ai-harvey-news
-conda activate voice-tts
-python main.py serve &
-```
-
----
-
 ## Last Updated
 
-2026-03-26 - Full nightly cron pipeline (scrape → fetch-content → generate-audio --limit 5)
+2026-04-08 - Migrated TTS from inline Qwen3-TTS to ComfyUI API backend; updated start_comfyui.sh for NVIDIA/AMD GPU auto-detect; added generate_harvey_tts.py standalone script
